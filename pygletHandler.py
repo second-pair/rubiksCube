@@ -16,8 +16,6 @@ from primitives import *
 
 
 
-##  Main Code
-
 #  Initialise the window
 window = pyglet .window .Window ()
 
@@ -53,17 +51,15 @@ def on_draw ():
 	glRotatef (rz, 0, 0, 1)
 	glRotatef (ry, 0, 1, 0)
 	glRotatef (rx, 1, 0, 0)
-	cube1 .getRenderBatch () .draw ()
-	#cubesBatch .draw ()
+	theRubiksCube .renderTheCubes ()
 
 #  One-time GL setup
-def setup ():
+def pygletSetup ():
 	glClearColor (40.0 / 255, 43.0 / 255, 53.0 / 255, 0)
 	glColor3f (25.0 /255, 196.0 / 255, 241.0 / 255)
 	glEnable (GL_DEPTH_TEST)
 #	glEnable (GL_CULL_FACE)
 	pyglet .clock .schedule (update)
 
-#  Nearly there...
-setup ()
+#  Initialise rotation variables
 rx = ry = rz = 0

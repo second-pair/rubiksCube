@@ -15,19 +15,16 @@ from pygletHandler import *
 
 ##  Classes
 class Cube:
-	verticesCount = 24
-	verticesType = "v3i"
-	renderBatch = pyglet .graphics .Batch ()
-
-
-	def __init__ (self, cubeSize, xPos, yPos, zPos):
-		self .cubeSize = cubeSize
+	def __init__ (self, cubeLength, xPos, yPos, zPos):
+		self .cubeLength = cubeLength
 		self .xPos = xPos
 		self .yPos = yPos
 		self .zPos = zPos
+
 		self .buildCube ()
-		self .renderBatch .add (self .verticesCount, pyglet .gl .GL_QUADS, None, (self .verticesType, self .vertices))
-		#cubesBatch .add (cube1 .getVerticesCount (), pyglet .gl .GL_QUADS, None, (cube1 .getVerticesType (), cube1 .getVertices ()))
+		self .setVerticesCount ()
+		self .verticesType = "v3i"
+		#self .renderBatch .add (self .verticesCount, pyglet .gl .GL_QUADS, None, (self .verticesType, self .vertices))
 
 	def getRenderBatch (self):
 		return self .renderBatch
@@ -35,13 +32,13 @@ class Cube:
 	def getPos (self):
 		return (self .xPos, self .yPos)
 
-	def getCubeSize (self):
-		return self .cubeSize
+	def getcubeLength (self):
+		return self .cubeLength
 
-	#def setVerticesCount (self):
-	
+	def setVerticesCount (self):
+		self .verticesCount = len (self .vertices) // 3
+
 	def getVerticesCount (self):
-		#  Change this to work out automatically - we'll probably be changing the shape of things often
 		return self .verticesCount
 
 	def getVertices (self):
@@ -54,10 +51,10 @@ class Cube:
 		xN = self .xPos
 		yN = self .yPos
 		zN = self .zPos
-		xF = self .xPos + self .cubeSize
-		yF = self .yPos + self .cubeSize
-		zF = self .zPos + self .cubeSize
-		
+		xF = self .xPos + self .cubeLength
+		yF = self .yPos + self .cubeLength
+		zF = self .zPos + self .cubeLength
+
 		self .vertices = (
 			xN,yN,zN, xF,yN,zN, xF,yF,zN, xN,yF,zN,
 			xN,yN,zN, xN,yF,zN, xN,yF,zF, xN,yN,zF,
@@ -71,112 +68,73 @@ class Cube:
 		xN = self .xPos
 		yN = self .yPos
 		zN = self .zPos
-		xF = self .xPos + self .cubeSize
-		yF = self .yPos + self .cubeSize
-		zF = self .zPos + self .cubeSize
-	
+		xF = self .xPos + self .cubeLength
+		yF = self .yPos + self .cubeLength
+		zF = self .zPos + self .cubeLength
+
 		return (
 			xN,yN,zN, xF,yN,zN, xF,yN,zF, xN,yN,zF,
 			xN,yF,zN, xF,yF,zN, xF,yF,zF, xN,yF,zF
 		)
 
 	def printCornerVertices (self):
-		xN = self .xPos
-		yN = self .yPos
-		zN = self .zPos
-		xF = self .xPos + self .cubeSize
-		yF = self .yPos + self .cubeSize
-		zF = self .zPos + self .cubeSize
+		xN = self .xPos % 1000
+		yN = self .yPos % 1000
+		zN = self .zPos % 1000
+		xF = (self .xPos + self .cubeLength) % 1000
+		yF = (self .yPos + self .cubeLength) % 1000
+		zF = (self .zPos + self .cubeLength) % 1000
 
-		print ("ULF:  ")
-		print ("LLF:  ")
-		
+		print ("                - [%03d,%03d,%03d]" % (xF, yF, zF))
+		print ("            -       -")
+		print ("        -               -")
+		print ("    -                       -")
+		print ("- [%03d,%03d,%03d]                 - [%03d,%03d,%03d]" % (xN, yF, zF, xF, yF, zN))
+		print ("|   -                       -   |")
+		print ("|       -               -       |")
+		print ("|           -       -           |")
+		print ("|               - [%03d,%03d,%03d] |" % (xN, yF, zN))
+		print ("|               |               |")
+		print ("|               | [%03d,%03d,%03d] |" % (xF,yN, zF))
+		print ("|               |               |")
+		print ("- [%03d,%03d,%03d] |               - [%03d,%03d,%03d]" % (xN, yN, zF, xF, yN, zN))
+		print ("    -           |           -")
+		print ("        -       |       -")
+		print ("            -   |   -")
+		print ("                - [%03d,%03d,%03d]" % (xN, yN, zN))
+
 
 class RubiksCube:
-	theCubes = []
-	#number, size, x, y, z
+	def __init__ (self):
+		self .renderBatch = pyglet .graphics .Batch ()
+		self .theCubes = []
 
-	def __init__ (self, cubeCount, cubeLength, xPos, yPos, zPos):
+	#  Start building the Rubik's Cube
+	def init (self, cubeCount, cubeLength, xPos, yPos, zPos):
 		self .cubeCount = cubeCount
 		self .cubeLength = cubeLength
 		self .xPos = xPos
 		self .yPos = yPos
 		self .zPos = zPos
-
-		self .generateCubes ()
+		self .generateTheCubes ()
 
 	#  Generate the cubes
-	def generateCubes (self):
+	def generateTheCubes (self):
 		for i in range (self .cubeCount):
 			#  Grab a new cube
-			newCube = Cube (self .cubeLength, self .xPos, self .yPos, self .zPos)
+			newCube = Cube (self .cubeLength, self .xPos, self .yPos + (15 * i), self .zPos)
 			#  Add it to the list of cubes
 			self .theCubes .append (newCube)
 			#  Add it to the render queue
 			self .renderBatch .add (newCube .getVerticesCount (), pyglet .gl .GL_QUADS, None, (newCube .getVerticesType (), newCube .getVertices ()))
 
 	def renderTheCubes (self):
-		print ("Rendering later")
-			
+		self .renderBatch .draw ()
+
+	def getTheCubes (self):
+		return self .theCubes
 
 
 
-##  Batches
-
-#cubesBatch = pyglet .graphics .Batch ()
-
-
-
-##  Primitives
-#rCube1 = RubiksCube (1, 15, 0, 0, 0)
-cube1 = Cube (15, 0, 0, 0)
-#cubesBatch .add (cube1 .getVerticesCount (), pyglet .gl .GL_QUADS, None, (cube1 .getVerticesType (), cube1 .getVertices ()))
-
-print (cube1 .getCornerVertices ())
-
-'''
-cube1 = cubesBatch .add (24, pyglet .gl .GL_QUADS, None, ("v3i", (
-	50, 50, 50,
-	50, 80, 50,
-	80, 80, 50,
-	80, 50, 50,
-
-	50, 50, 50,
-	50, 80, 50,
-	50, 80, 80,
-	50, 50, 80,
-
-	50, 50, 50,
-	80, 50, 50,
-	80, 50, 80,
-	50, 50, 80,
-
-	50, 80, 50,
-	50, 80, 80,
-	80, 80, 80,
-	80, 80, 50,
-
-	80, 50, 50,
-	80, 50, 80,
-	80, 80, 80,
-	80, 80, 50,
-
-	50, 50, 80,
-	50, 80, 80,
-	80, 80, 80,
-	80, 50, 80
-	)))
-'''
-'''
-cube2 = cubesBatch .add (8, pyglet .gl .GL_QUADS, None, ("v3i", (
-	0, 0, 100,
-	0, 10, 100,
-	10, 10, 100,
-	10, 0, 100,
-	
-	0, 0, 0,
-	0, 10, 0,
-	10, 10, 0,
-	10, 0, 0
-	)))
-'''
+##  Initialise the primitives
+theRubiksCube = RubiksCube ()
