@@ -6,4 +6,31 @@
 
 import pyglet
 
-print ("Hello, world!")
+#  Parameters & Globals
+#cube size
+#face colours
+#starting face
+#shuffling options
+#font
+
+#  Pyglet Init
+window = pyglet .window .Window ()
+
+#  Pyglet Render
+@window .event
+def on_draw ():
+	window .clear ()
+	label .draw ()
+
+#  For now, we'll just start by rendering some text.
+label = pyglet .text .Label (
+	"Hello, world!",
+	font_name = "Calibri",
+	font_size = 36,
+	x = window .width // 2,
+	y = window .height // 2,
+	anchor_x = "center",
+	anchor_y = "center"
+	)
+
+pyglet .app .run ()
