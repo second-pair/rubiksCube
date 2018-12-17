@@ -53,7 +53,8 @@ def on_draw ():
 	glRotatef (rz, 0, 0, 1)
 	glRotatef (ry, 0, 1, 0)
 	glRotatef (rx, 1, 0, 0)
-	cubesBatch .draw ()
+	cube1 .getRenderBatch () .draw ()
+	#cubesBatch .draw ()
 
 #  One-time GL setup
 def setup ():
