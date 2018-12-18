@@ -50,7 +50,7 @@ def on_draw ():
 #	window .clear ()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	glLoadIdentity()
-	glTranslatef(0, 0, -100)
+	glTranslatef(0, 0, userCameraDistance)
 	glRotatef (rz, 0, 0, 1)
 	glRotatef (ry, 0, 1, 0)
 	glRotatef (rx, 1, 0, 0)

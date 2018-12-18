@@ -6,11 +6,14 @@
 #  Programme Parameters
 userScreenWidth = 2560
 userScreenHeight = 1440
+userCameraDistance = -150
 
 #  Cube Parameters
-userCubeSize = 3
-userCubeLength = 15
-userCubeFaceBorderMargin = 1.7
+userCubeSize = 5
+userCubeLength = 20
+userCubeFaceBorderMargin = 1.3
+userCubeSpacing = 1.5
+userStartingFace = 1
 
 #  Colours
 userBackgroundColour = (40, 43, 53)
