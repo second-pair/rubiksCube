@@ -10,6 +10,7 @@
 import pyglet
 from pyglet .gl import *
 from pygletHandler import *
+from preferences import *
 
 
 
@@ -62,7 +63,6 @@ class Cube:
 
 		self .verticesType = "v3i"
 		self .vertices = (
-			#  Need to add colours to these
 			#  Front
 			xN,yN,zN, xF,yN,zN, xF,yF,zN, xN,yF,zN,
 			#  Left
@@ -78,20 +78,12 @@ class Cube:
 		)
 
 		self .coloursType = "c3f"
-		self .colours = (
-			#  Front
-			253.0 / 255, 144.0 / 255, 80, 253.0 / 255, 144.0 / 255, 80, 253.0 / 255, 144.0 / 255, 80, 253.0 / 255, 144.0 / 255, 80,
-			#  Left
-			1,1,1, 1,1,1, 1,1,1, 1,1,1,
-			#  Bottom
-			1,1,1, 1,1,1, 1,1,1, 1,1,1,
-			#  Right
-			1,1,1, 1,1,1, 1,1,1, 1,1,1,
-			#  Top
-			1,1,1, 1,1,1, 1,1,1, 1,1,1,
-			#  Back
-			1,1,1, 1,1,1, 1,1,1, 1,1,1
-		)
+		coloursGenerate = []
+		for i in range (6):
+			for j in range (4):
+				for k in range (3):
+					coloursGenerate .append (userFaceColours[i][k] / 255)
+		self .colours = tuple (coloursGenerate)
 
 	def getCornerVertices (self):
 		#  Gets and returns the vertices of all the getCornerVertices

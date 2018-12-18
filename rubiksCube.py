@@ -12,23 +12,19 @@
 #  I've cannibalised this file to get started:
 #https://github.com/adamlwgriffiths/Pyglet/blob/master/examples/graphics.py
 
+
+
+#  Includes
 import pyglet
 from pyglet .gl import *
 from pygletHandler import *
-
-#  Parameters & Globals
-#  Probably wanna JSON these suckers
-#cube size
-#face colours
-#starting face
-#shuffling options
-#font
+from preferences import *
 
 
 
 ##  Main Code
 pygletSetup ()
-theRubiksCube .init (3, 15, 0, 0, 0)
+theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
 
 #  Setup complete!
 pyglet .app .run ()

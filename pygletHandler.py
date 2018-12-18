@@ -13,6 +13,7 @@
 import pyglet
 from pyglet .gl import *
 from primitives import *
+from preferences import *
 
 
 
@@ -55,8 +56,8 @@ def on_draw ():
 
 #  One-time GL setup
 def pygletSetup ():
-	glClearColor (40.0 / 255, 43.0 / 255, 53.0 / 255, 0)
-	glColor3f (25.0 /255, 196.0 / 255, 241.0 / 255)
+	glClearColor (userBackgroundColour[0] / 255, userBackgroundColour[1] / 255, userBackgroundColour[2] / 255, 0)
+	#glColor3f  (25.0 /255, 196.0 / 255, 241.0 / 255)
 	glEnable (GL_DEPTH_TEST)
 #	glEnable (GL_CULL_FACE)
 	pyglet .clock .schedule (update)
