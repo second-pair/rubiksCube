@@ -18,7 +18,8 @@ from preferences import *
 
 
 #  Initialise the window
-window = pyglet .window .Window ()
+window = pyglet .window .Window (userScreenWidth, userScreenHeight)
+spinTheCube = True
 
 #  Really this is an Init thing, despite being on_resize
 #  Seems to sort the depth problem
@@ -35,12 +36,13 @@ def on_resize (width, height):
 #  Update our viewport's rotation
 def update (dt):
 	global rx, ry, rz
-	rx += dt * 50
-	ry += dt * 40
-	rz += dt * 15
-	rx %= 360
-	ry %= 360
-	rz %= 360
+	if spinTheCube:
+		rx += dt * 50
+		ry += dt * 40
+		rz += dt * 15
+		rx %= 360
+		ry %= 360
+		rz %= 360
 
 #  Refresh and render the view
 @window .event
@@ -53,6 +55,20 @@ def on_draw ():
 	glRotatef (ry, 0, 1, 0)
 	glRotatef (rx, 1, 0, 0)
 	theRubiksCube .renderTheCubes ()
+
+#  Add toggle-to-pause
+@window .event
+def on_mouse_press (x, y, button, modifiers):
+	if button == pyglet .window .mouse .LEFT:
+		global spinTheCube
+		spinTheCube = not spinTheCube
+@window .event
+def on_key_press (symbol, modifiers):
+	if symbol == pyglet .window .key .SPACE:
+		global spinTheCube
+		spinTheCube = not spinTheCube
+	if symbol == pyglet .window .key .Q:
+		exit ()
 
 #  One-time GL setup
 def pygletSetup ():

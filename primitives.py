@@ -57,24 +57,51 @@ class Cube:
 		xN = self .xPos
 		yN = self .yPos
 		zN = self .zPos
-		xF = self .xPos + int (10 * adjCubeLength)
-		yF = self .yPos + int (10 * adjCubeLength)
-		zF = self .zPos + int (10 * adjCubeLength)
+		xF = self .xPos + int (adjCubeLength * 10)
+		yF = self .yPos + int (adjCubeLength * 10)
+		zF = self .zPos + int (adjCubeLength * 10)
+		b = int (adjCubeLength * userCubeFaceBorderMargin)
 
 		self .verticesType = "v3i"
 		self .vertices = (
+			#  What a mess...
+			#0,0,0, 0,0,0, 0,0,0, 0,0,0,#
 			#  Front
-			xN,yN,zN, xF,yN,zN, xF,yF,zN, xN,yF,zN,
+			xN+b,yN+b,zN, xF-b,yN+b,zN, xF-b,yF-b,zN, xN+b,yF-b,zN,
+			xN,yN,zN, xF-b,yN,zN, xF-b,yN+b,zN, xN,yN+b,zN,
+			xF-b,yN,zN, xF,yN,zN, xF,yF-b,zN, xF-b,yF-b,zN,
+			xN+b,yF-b,zN, xF,yF-b,zN, xF,yF,zN, xN,yF,zN,
+			xN,yN+b,zN, xN+b,yN+b,zN, xN+b,yF,zN, xN,yF,zN,
 			#  Left
-			xN,yN,zN, xN,yF,zN, xN,yF,zF, xN,yN,zF,
+			xN,yN+b,zN+b, xN,yF-b,zN+b, xN,yF-b,zF-b, xN,yN+b,zF-b,
+			xN,yN,zN, xN,yF-b,zN, xN,yF-b,zN+b, xN,yN,zN+b,
+			xN,yF-b,zN, xN,yF,zN, xN,yF,zF-b, xN,yF-b,zF-b,
+			xN,yF,zF-b, xN,yN+b,zF-b, xN,yN+b,zF, xN,yF,zF,
+			xN,yN,zF, xN,yN+b,zF, xN,yN+b,zN+b, xN,yN,zN+b,
 			#  Bottom
-			xN,yN,zN, xF,yN,zN, xF,yN,zF, xN,yN,zF,
+			xN+b,yN,zN+b, xF-b,yN,zN+b, xF-b,yN,zF-b, xN+b,yN,zF-b,
+			xN,yN,zN, xF-b,yN,zN, xF-b,yN,zN+b, xN,yN,zN+b,
+			xF-b,yN,zN, xF,yN,zN, xF,yN,zF-b, xF-b,yN,zF-b,
+			xF,yN,zF-b, xF,yN,zF, xN,yN,zF, xN,yN,zF-b,
+			xN+b,yN,zF, xN,yN,zF, xN,yN,zN+b, xN+b,yN,zN+b,
 			#  Right
-			xF,yN,zN, xF,yN,zF, xF,yF,zF, xF,yF,zN,
+			xF,yN+b,zN+b, xF,yN+b,zF-b, xF,yF-b,zF-b, xF,yF-b,zN+b,
+			xF,yN,zN, xF,yN,zN+b, xF,yF-b,zN+b, xF,yF-b,zN,
+			xF,yF-b,zN, xF,yF,zN, xF,yF,zF-b, xF,yF-b,zF-b,
+			xF,yF,zF-b, xF,yF,zF, xF,yN+b,zF, xF,yN+b,zF-b,
+			xF,yN+b,zF, xF,yN,zF, xF,yN,zN+b, xF,yN+b,zN+b,
 			#  Top
-			xN,yF,zN, xF,yF,zN, xF,yF,zF, xN,yF,zF,
+			xN+b,yF,zN+b, xF-b,yF,zN+b, xF-b,yF,zF-b, xN+b,yF,zF-b,
+			xN,yF,zN, xF-b,yF,zN, xF-b,yF,zN+b, xN,yF,zN+b,
+			xF-b,yF,zN, xF,yF,zN, xF,yF,zF-b, xF-b,yF,zF-b,
+			xF,yF,zF, xN+b,yF,zF, xN+b,yF,zF-b, xF,yF,zF-b,
+			xN,yF,zF, xN+b,yF,zF, xN+b,yF,zN+b, xN,yF,zN+b,
 			#  Back
-			xN,yN,zF, xF,yN,zF, xF,yF,zF, xN,yF,zF
+			xN+b,yN+b,zF, xF-b,yN+b,zF, xF-b,yF-b,zF, xN+b,yF-b,zF,
+			xN,yN,zF, xN+b,yN,zF, xN+b,yF-b,zF, xN,yF-b,zF,
+			xN,yF-b,zF, xN,yF,zF, xF-b,yF,zF, xF-b,yF-b,zF,
+			xF-b,yF,zF, xF,yF,zF, xF,yN+b,zF, xF-b,yN+b,zF,
+			xN+b,yN,zF, xF,yN,zF, xF,yN+b,zF, xN+b,yN+b,zF
 		)
 
 		self .coloursType = "c3f"
@@ -83,6 +110,8 @@ class Cube:
 			for j in range (4):
 				for k in range (3):
 					coloursGenerate .append (userFaceColours[i][k] / 255)
+			for l in range (48):
+				coloursGenerate .append (0)
 		self .colours = tuple (coloursGenerate)
 
 	def getCornerVertices (self):
@@ -144,12 +173,14 @@ class RubiksCube:
 
 	#  Generates the cubes and adds them to the renderBatch
 	def generateTheCubes (self):
+		cubeSpacing = 1
+
 		for i in range (self .cubeCount):
 			for j in range (self .cubeCount):
 				for k in range (self .cubeCount):
-					theXPos = self .xPos + (i * int (self .cubeLength * 1.5))
-					theYPos = self .yPos + (j * int (self .cubeLength * 1.5))
-					theZPos = self .zPos + (k * int (self .cubeLength * 1.5))
+					theXPos = self .xPos + (i * int (self .cubeLength * cubeSpacing))
+					theYPos = self .yPos + (j * int (self .cubeLength * cubeSpacing))
+					theZPos = self .zPos + (k * int (self .cubeLength * cubeSpacing))
 
 					#  Grab a new cube
 					newCube = Cube (self .cubeLength, theXPos, theYPos, theZPos)

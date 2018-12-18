@@ -3,9 +3,14 @@
 #  Author:  Blair Edwards 2018
 #  Parameters & Globals
 
+#  Programme Parameters
+userScreenWidth = 2560
+userScreenHeight = 1440
+
 #  Cube Parameters
 userCubeSize = 3
 userCubeLength = 15
+userCubeFaceBorderMargin = 1.7
 
 #  Colours
 userBackgroundColour = (40, 43, 53)
