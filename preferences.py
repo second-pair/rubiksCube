@@ -4,9 +4,9 @@
 #  Parameters & Globals
 
 #  Programme Parameters
-userScreenWidth = 2560
-userScreenHeight = 1440
-userCameraDistance = -150
+userScreenWidth = 1800
+userScreenHeight = 1000
+userCameraDistance = -250
 
 #  Cube Parameters
 userCubeSize = 5

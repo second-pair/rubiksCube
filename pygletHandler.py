@@ -18,7 +18,7 @@ from preferences import *
 
 
 #  Initialise the window
-window = pyglet .window .Window (userScreenWidth, userScreenHeight)
+window = pyglet .window .Window (userScreenWidth, userScreenHeight, resizable = True)
 spinTheCube = True
 
 #  Really this is an Init thing, despite being on_resize
@@ -37,9 +37,9 @@ def on_resize (width, height):
 def update (dt):
 	global rx, ry, rz
 	if spinTheCube:
-		rx += dt * 50
-		ry += dt * 40
-		rz += dt * 15
+		rx += dt * 5
+		ry += dt * 15
+		rz += dt * 5
 		rx %= 360
 		ry %= 360
 		rz %= 360
@@ -51,9 +51,9 @@ def on_draw ():
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	glLoadIdentity()
 	glTranslatef(0, 0, userCameraDistance)
-	glRotatef (rz, 0, 0, 1)
+	glRotated (rx, 1, 0, 0)
 	glRotatef (ry, 0, 1, 0)
-	glRotatef (rx, 1, 0, 0)
+	glRotatef (rz, 0, 0, 1)
 	theRubiksCube .renderTheCubes ()
 
 #  Add toggle-to-pause

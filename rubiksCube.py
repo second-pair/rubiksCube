@@ -25,6 +25,8 @@ from preferences import *
 ##  Main Code
 pygletSetup ()
 theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
+theRubiksCube .printCubeCount ()
+theRubiksCube .rotateAFace (1, 'cw')
 
 #  Setup complete!
 pyglet .app .run ()
