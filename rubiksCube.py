@@ -28,8 +28,7 @@ from pygletHandler import *
 
 ##  Main Code
 pygletSetup ()
-theRubiksCube .init (2, 10, 0, 0, 0)
-print (theRubiksCube .getTheCubes ()[0] .printCornerVertices ())
+theRubiksCube .init (3, 15, 0, 0, 0)
 
 #  Setup complete!
 pyglet .app .run ()
