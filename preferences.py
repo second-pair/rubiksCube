@@ -6,7 +6,8 @@
 #  Programme Parameters
 userScreenWidth = 1800
 userScreenHeight = 1000
-userCameraDistance = -250
+#userCameraDistance = -250
+userCameraDistance = -50
 
 #  Cube Parameters
 userCubeSize = 5

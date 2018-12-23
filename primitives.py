@@ -14,6 +14,103 @@ from preferences import *
 
 
 
+class cubeFace:
+	def __init__ (self):
+		self .renderBatch = pyglet .graphics .Batch ()
+
+	def init (self, xPos, yPos, zPos, xAngle, yAngle, zAngle, cubeLength, startColour):
+		self .xPos = xPos - int (cubeLength / 2)
+		self .yPos = yPos - int (cubeLength / 2)
+		self .zPos = zPos - int (cubeLength / 2)
+		self .xAngle = xAngle
+		self .yAngle = yAngle
+		self .zAngle = zAngle
+
+		self .cubeLength = cubeLength
+		self .faceColour = startColour
+
+		self .createTheFace ()
+
+	def createTheFace (self):
+		#  Builds the cube's vertices
+		#  This now builds a "unit" model and scales it by the cubeLength
+		adjCubeLength = self .cubeLength / 10
+
+		#  Set as 0s initially, then transform to desired location
+		xN = 0
+		yN = 0
+		zN = 0
+		xF = 0 + int (adjCubeLength * 10)
+		yF = 0 + int (adjCubeLength * 10)
+		zF = 0 + int (adjCubeLength * 10)
+		b = int (adjCubeLength * userCubeFaceBorderMargin)
+
+		self .verticesType = "v3i"
+		self .vertices = (
+			xN+b,yN+b,zN, xF-b,yN+b,zN, xF-b,yF-b,zN, xN+b,yF-b,zN,
+			xN,yN,zN, xF-b,yN,zN, xF-b,yN+b,zN, xN,yN+b,zN,
+			xF-b,yN,zN, xF,yN,zN, xF,yF-b,zN, xF-b,yF-b,zN,
+			xN+b,yF-b,zN, xF,yF-b,zN, xF,yF,zN, xN,yF,zN,
+			xN,yN+b,zN, xN+b,yN+b,zN, xN+b,yF,zN, xN,yF,zN
+		)
+
+		self .coloursType = "c3f"
+		coloursGenerate = []
+		#for i in range (6):
+		for j in range (4):
+			for k in range (3):
+				coloursGenerate .append (userFaceColours[self .faceColour][k] / 255)
+		for l in range (48):
+			coloursGenerate .append (0)
+		self .colours = tuple (coloursGenerate)
+
+		#  Calculate the number of vertices
+		self .setVerticesCount ()
+
+		#  Add vertices to the render queue
+		self .renderBatch .add (self .getVerticesCount (), pyglet .gl .GL_QUADS, None,
+			(self .getVerticesType (), self .getVertices ()),
+			(self .getColoursType (), self .getColours ())
+		)
+
+		#  Move face to desired location
+		self .transform ()
+
+	def transform (self):
+		pass
+
+	def render (self):
+		self .renderBatch .draw ()
+
+	def getPos (self):
+		return (self .xPos, self .yPos, self .zPos)
+
+	def getAngles (self):
+		return (self .xAngle, self .yAngle, self .zAngle)
+
+	def getcubeLength (self):
+		return self .cubeLength
+
+	def setVerticesCount (self):
+		#  Calculates the number of vertices and stores it
+		self .verticesCount = len (self .vertices) // 3
+
+	#  Vertices
+	def getVertices (self):
+		return self .vertices
+	def getVerticesType (self):
+		return self .verticesType
+	def getVerticesCount (self):
+		return self .verticesCount
+
+	#  Colours
+	def getColours (self):
+		return self .colours
+	def getColoursType (self):
+		return self .coloursType
+
+
+
 ##  Classes
 class Cube:
 	#  Should maybe consider storing each quad as its own object, making it simple to update the position of said quad down the line?
@@ -117,7 +214,7 @@ class Cube:
 		self .colours = tuple (coloursGenerate)
 
 	def getCornerVertices (self):
-		#  Gets and returns the vertices of all the getCornerVertices
+		#  Gets and returns the vertices of all the corners
 
 		xN = self .xPos
 		yN = self .yPos
@@ -157,6 +254,7 @@ class Cube:
 		print ("        -       |       -")
 		print ("            -   |   -")
 		print ("                - [%03d,%03d,%03d]" % (xN, yN, zN))
+
 
 
 class RubiksCube:
@@ -335,6 +433,15 @@ class RubiksCube:
 		print ("%d cubes counted." % theCount)
 
 
+	def updateCubePositions (self)
+		#  This is basically the equivalent of peeling all the stickers off and
+		#  Sticking them back on where we want
+
+		#for cube in theCubes etc
+		#theCube nowLooksLike theRubiksCubeMatrix [whatever]
+		pass
+
+
 	#  Actually, I think I'm doing this wrongself.#  This should probably be a
 	#  function that just rotates the individual cubes to reflect the status
 	#  of another matrix.
@@ -378,3 +485,4 @@ class RubiksCube:
 
 ##  Initialise the primitives
 theRubiksCube = RubiksCube ()
+tempFace = cubeFace ()

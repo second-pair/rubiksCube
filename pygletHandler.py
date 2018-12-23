@@ -55,6 +55,7 @@ def on_draw ():
 	glRotatef (ry, 0, 1, 0)
 	glRotatef (rz, 0, 0, 1)
 	theRubiksCube .renderTheCubes ()
+	tempFace .render ()
 
 #  Add toggle-to-pause
 @window .event

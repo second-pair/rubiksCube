@@ -19,14 +19,17 @@ import pyglet
 from pyglet .gl import *
 from pygletHandler import *
 from preferences import *
+from cubeMaths import *
 
 
 
 ##  Main Code
 pygletSetup ()
-theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
-theRubiksCube .printCubeCount ()
-theRubiksCube .rotateAFace (1, 'cw')
+theRubiksCubeMatrix = {"exists": True}
+#theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
+#theRubiksCube .printCubeCount ()
+#theRubiksCube .rotateAFace (1, 'cw')
+tempFace .init (10, 10, 10, 45, 45, 45, 20, 5)
 
 #  Setup complete!
 pyglet .app .run ()
