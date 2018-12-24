@@ -9,6 +9,9 @@
 #  I intend that the programme will display a cube being solved and output a list of moves.
 #  I'll also need to implement a shuffling algorithm.
 
+#  Dependencies:
+#  pyglet (pip-able)
+
 #  I've cannibalised this file to get started:
 #https://github.com/adamlwgriffiths/Pyglet/blob/master/examples/graphics.py
 
@@ -25,10 +28,11 @@ from cubeMaths import *
 
 ##  Main Code
 pygletSetup ()
-theRubiksCubeMatrix = {"exists": True}
-#theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
-#theRubiksCube .printCubeCount ()
-#theRubiksCube .rotateAFace (1, 'cw')
+#theRubiksCubeVisual .init (userCubeSize, userCubeLength, 0, 0, 0)
+#theRubiksCubeVisual .printCubeCount ()
+#theRubiksCubeVisual .rotateAFace (1, 'cw')
+
+theRubiksCubeMatrix .init (userCubeSize)
 tempFace .init (10, 10, 10, 45, 45, 45, 20, 5)
 
 #  Setup complete!

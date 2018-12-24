@@ -257,7 +257,7 @@ class Cube:
 
 
 
-class RubiksCube:
+class RubiksCubeVisual:
 	def __init__ (self):
 		self .renderBatch = pyglet .graphics .Batch ()
 
@@ -433,7 +433,7 @@ class RubiksCube:
 		print ("%d cubes counted." % theCount)
 
 
-	def updateCubePositions (self)
+	def updateCubePositions (self):
 		#  This is basically the equivalent of peeling all the stickers off and
 		#  Sticking them back on where we want
 
@@ -484,5 +484,5 @@ class RubiksCube:
 
 
 ##  Initialise the primitives
-theRubiksCube = RubiksCube ()
+theRubiksCubeVisual = RubiksCubeVisual ()
 tempFace = cubeFace ()
