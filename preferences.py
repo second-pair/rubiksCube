@@ -13,7 +13,7 @@ userCameraDistance = -150
 userCubeSize = 5
 userCubeLength = 20
 userCubeFaceBorderMargin = 1.3
-userCubeSpacing = 1.5
+userCubeSpacing = 1
 userStartingFace = 1
 
 #  Colours

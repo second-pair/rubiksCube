@@ -74,52 +74,36 @@ class RubiksCube:
 		#  Grab a new cube
 		newFace = CubeFace ()
 
-		#  Calculate angles and positions
+		#  Calculate positions
+		#  Instead of actually faffing around with 3D rotation, how's about
+		#  we just work it out manually instead?
 		if theFace == 0:
 			faceXPos = self .xPos + index1Scaled
 			faceYPos = self .yPos + startScaled
 			faceZPos = self .zPos + index2Scaled
-			faceXAngle = 0
-			faceYAngle = 30
-			faceZAngle = 30
 		elif theFace == 1:
 			faceXPos = self .xPos + index1Scaled
 			faceYPos = self .yPos + index2Scaled
 			faceZPos = self .zPos + startScaled
-			faceXAngle = 0
-			faceYAngle = 0
-			faceZAngle = 0
 		elif theFace == 2:
 			faceXPos = self .xPos + endScaled
 			faceYPos = self .yPos + index1Scaled
 			faceZPos = self .zPos + index2Scaled
-			faceXAngle = 0
-			faceYAngle = 0
-			faceZAngle = 0
 		elif theFace == 3:
 			faceXPos = self .xPos + index1Scaled
 			faceYPos = self .yPos + index2Scaled
 			faceZPos = self .zPos + endScaled
-			faceXAngle = 0
-			faceYAngle = 0
-			faceZAngle = 0
 		elif theFace == 4:
 			faceXPos = self .xPos + startScaled
 			faceYPos = self .yPos + index1Scaled
 			faceZPos = self .zPos + index2Scaled
-			faceXAngle = 0
-			faceYAngle = 0
-			faceZAngle = 0
 		elif theFace == 5:
 			faceXPos = self .xPos + index1Scaled
 			faceYPos = self .yPos + endScaled
 			faceZPos = self .zPos + index2Scaled
-			faceXAngle = 0
-			faceYAngle = 0
-			faceZAngle = 0
 
-		#newFace .init (xPos, yPos, zPos, xAngle, yAngle, zAngle, cubeLength, startColour)
-		newFace .init (faceXPos, faceYPos, faceZPos, faceXAngle, faceYAngle, faceZAngle, self .cubeLength, theFace)
+		#newFace .init (xPos, yPos, zPos, cubeLength, startColour)
+		newFace .init (faceXPos, faceYPos, faceZPos, self .cubeLength, theFace)
 		#  Return it to the caller
 		return newFace
 
