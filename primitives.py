@@ -411,7 +411,7 @@ class RubiksCubeVisual:
 		#  Return it to the caller
 		return newCube
 
-	def renderTheCubes (self):
+	def renderTheFaces (self):
 		#  Updates the cube's positions via the Pyglet batch
 		self .renderBatch .draw ()
 
@@ -480,9 +480,3 @@ class RubiksCubeVisual:
 
 		#  Let's just print it for now...
 		print ("Rotating %d cubes..." % len (rotatingCubes))
-
-
-
-##  Initialise the primitives
-theRubiksCubeVisual = RubiksCubeVisual ()
-tempFace = cubeFace ()

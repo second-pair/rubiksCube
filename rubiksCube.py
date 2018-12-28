@@ -33,7 +33,10 @@ pygletSetup ()
 #theRubiksCubeVisual .rotateAFace (1, 'cw')
 
 theRubiksCubeMatrix .init (userCubeSize)
-tempFace .init (10, 10, 10, 45, 45, 45, 20, 5)
+for i in range (6):
+    print ("Face %d:" % i)
+    print (theRubiksCubeMatrix .getFace (i))
+    print ("\n")
 
 #  Setup complete!
 pyglet .app .run ()
