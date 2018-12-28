@@ -17,7 +17,6 @@ from primitives import *
 
 class RubiksCube:
 	def __init__ (self):
-		self .renderBatch = pyglet .graphics .Batch ()
 		self .sideMatrix = []
 		self .visualMatrix = []
 		#self .theRubiksCubeVisual = RubiksCubeVisual ()
@@ -25,6 +24,8 @@ class RubiksCube:
 	def init (self, cubeCount = userCubeSize, cubeLength = userCubeLength, xPos = 0, yPos = 0, zPos = 0):
 		self .cubeCount = cubeCount
 		self .cubeLength = cubeLength
+		self .cubeSpacingModifier = int (self .cubeLength * userCubeSpacing)
+
 		self .xPos = xPos - int (cubeLength * cubeCount / 2)
 		self .yPos = yPos - int (cubeLength * cubeCount / 2)
 		self .zPos = zPos - int (cubeLength * cubeCount / 2)
@@ -58,23 +59,67 @@ class RubiksCube:
 				for y in range (self .cubeCount):
 					self .visualMatrix [currSide][x] .append (self .generateAFace (currSide, x, y))
 
-	def generateAFace (self, theFace, xPos, yPos):
+	def generateAFace (self, theFace, index1, index2):
 		#  Was originally for cubes, will convert to faces
 		#  We'll need to use the given RubiksCube X, Y and Z positions to work
 		#  out the faces' positions and rotations
 
-		#  Calculate angles and positions
-		#for ...
+		#  Grab relevant variables
+		startIndex = self .cubeCount // 2
+		index1Scaled = index1 * self .cubeSpacingModifier
+		index2Scaled = index2 * self .cubeSpacingModifier
+		startScaled = 0 * self .cubeSpacingModifier
+		endScaled = (self .cubeCount - 1) * self .cubeSpacingModifier
+
 		#  Grab a new cube
 		newFace = CubeFace ()
-		#newFace .init (xPos, yPos, zPos, xAngle, yAngle, zAngle, cubeLength, startColour)
-		newFace .init (xPos * self .cubeLength, yPos * self .cubeLength, theFace * 10, 0, 0, 0, self .cubeLength, theFace)
 
-		#  Add it to the render queue
-		self .renderBatch .add (newFace .getVerticesCount (), pyglet .gl .GL_QUADS, None,
-			(newFace .getVerticesType (), newFace .getVertices ()),
-			(newFace .getColoursType (), newFace .getColours ())
-		)
+		#  Calculate angles and positions
+		if theFace == 0:
+			faceXPos = self .xPos + index1Scaled
+			faceYPos = self .yPos + startScaled
+			faceZPos = self .zPos + index2Scaled
+			faceXAngle = 0
+			faceYAngle = 30
+			faceZAngle = 30
+		elif theFace == 1:
+			faceXPos = self .xPos + index1Scaled
+			faceYPos = self .yPos + index2Scaled
+			faceZPos = self .zPos + startScaled
+			faceXAngle = 0
+			faceYAngle = 0
+			faceZAngle = 0
+		elif theFace == 2:
+			faceXPos = self .xPos + endScaled
+			faceYPos = self .yPos + index1Scaled
+			faceZPos = self .zPos + index2Scaled
+			faceXAngle = 0
+			faceYAngle = 0
+			faceZAngle = 0
+		elif theFace == 3:
+			faceXPos = self .xPos + index1Scaled
+			faceYPos = self .yPos + index2Scaled
+			faceZPos = self .zPos + endScaled
+			faceXAngle = 0
+			faceYAngle = 0
+			faceZAngle = 0
+		elif theFace == 4:
+			faceXPos = self .xPos + startScaled
+			faceYPos = self .yPos + index1Scaled
+			faceZPos = self .zPos + index2Scaled
+			faceXAngle = 0
+			faceYAngle = 0
+			faceZAngle = 0
+		elif theFace == 5:
+			faceXPos = self .xPos + index1Scaled
+			faceYPos = self .yPos + endScaled
+			faceZPos = self .zPos + index2Scaled
+			faceXAngle = 0
+			faceYAngle = 0
+			faceZAngle = 0
+
+		#newFace .init (xPos, yPos, zPos, xAngle, yAngle, zAngle, cubeLength, startColour)
+		newFace .init (faceXPos, faceYPos, faceZPos, faceXAngle, faceYAngle, faceZAngle, self .cubeLength, theFace)
 		#  Return it to the caller
 		return newFace
 
@@ -85,7 +130,7 @@ class RubiksCube:
 		return self .sideMatrix [theFace][theXIndex][theYIndex]
 
 	def printFaceCount (self):
-		#  Sum up the number of stored cubes
+		#  Sum up the number of stored cubes by unwrapping the sideMatrix list
 		theCount = 0
 		for level1 in self .sideMatrix:
 			for level2 in level1:
@@ -94,8 +139,12 @@ class RubiksCube:
 		print ("%d faces counted." % theCount)
 
 	def renderTheFaces (self):
-		#  Updates the cube's positions via the Pyglet batch
-		self .renderBatch .draw ()
+		#  Grab all the updated colour data, face-by-face
+		for currSide in self .visualMatrix:
+			for currLine in currSide:
+				for currFace in currLine:
+					#  Render the face
+					currFace .render ()
 
 	def swapLines (self, line1: tuple, line2: tuple):
 		#  Function to rotate a slice of faces
