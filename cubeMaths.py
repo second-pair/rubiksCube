@@ -5,12 +5,15 @@
 ##  Notes
 
 #  Author:  Blair Edwards 2018
-#  This will end up holding the cube matrix and the cube-solving algorithms
-
-#  I've decided to merge the RubiksCubeMatrix and RubiksCubeVisual classes,
-#  since they were essentially controlling the same bit of data.
-#  This way, they don't have to keep updating each other every time something
-#  changes.
+#  This holds the cube matrix, the matrix of cube-graphics and the cube-solving
+#  algorithms.
+#  For the purposes of this project:
+#    A face refers to a single side of a single cube in a Rubik's Cube - IE
+#    a sticker.
+#    A side refers to a collection of such faces, all facing the same way.
+#  The idea is that the actual faces will remain the same and each time we
+#  swap faces around, we do the equivalent of peeling off the stickers and
+#  placing them back where we want them.
 
 from preferences import *
 from primitives import *
@@ -19,7 +22,6 @@ class RubiksCube:
 	def __init__ (self):
 		self .sideMatrix = []
 		self .visualMatrix = []
-		#self .theRubiksCubeVisual = RubiksCubeVisual ()
 
 	def init (self, cubeCount = userCubeSize, cubeLength = userCubeLength, xPos = 0, yPos = 0, zPos = 0):
 		self .cubeCount = cubeCount
@@ -33,10 +35,8 @@ class RubiksCube:
 		self .generateSideMatrix ()
 		self .generateVisualCube ()
 
-	#  Maybe we DO want to merge visuals and matrices after all...
-	#  We'd maybe end up with the sideMatrix array as an array of faces, but
-	#  that wouldn't be as efficient, so maybe stick wtih separate matrics...
-	#  Here we go again.
+	#  Generates a matrix of matrices of matrices to hold the cube's faces and
+	#  face-statuses
 	def generateSideMatrix (self):
 		#  Generate each side
 		for i in range (6):
@@ -48,8 +48,8 @@ class RubiksCube:
 				for k in range (self .cubeCount):
 					self .sideMatrix [i][j] .append (i)
 
+	#  Generates a matrix of matrices of matrices to hold the cube's visual info
 	def generateVisualCube (self):
-		#  Generate the visual cube
 		for currSide in range (6):
 			self .visualMatrix .append ([])
 
@@ -59,11 +59,8 @@ class RubiksCube:
 				for y in range (self .cubeCount):
 					self .visualMatrix [currSide][x] .append (self .generateAFace (currSide, x, y))
 
+	#  Generates a single visual face, in the correct orientation
 	def generateAFace (self, theFace, index1, index2):
-		#  Was originally for cubes, will convert to faces
-		#  We'll need to use the given RubiksCube X, Y and Z positions to work
-		#  out the faces' positions and rotations
-
 		#  Grab relevant variables
 		startIndex = self .cubeCount // 2
 		index1Scaled = index1 * self .cubeSpacingModifier
@@ -74,9 +71,7 @@ class RubiksCube:
 		#  Grab a new cube
 		newFace = CubeFace ()
 
-		#  Calculate positions
-		#  Instead of actually faffing around with 3D rotation, how's about
-		#  we just work it out manually instead?
+		#  Calculate co-ordinates
 		if theFace == 0:
 			faceXPos = self .xPos + index1Scaled
 			faceYPos = self .yPos + startScaled
@@ -102,18 +97,20 @@ class RubiksCube:
 			faceYPos = self .yPos + endScaled
 			faceZPos = self .zPos + index2Scaled
 
-		#newFace .init (xPos, yPos, zPos, cubeLength, startColour)
+		#  Initialise the new face with our co-ords and return it to the caller
 		newFace .init (faceXPos, faceYPos, faceZPos, self .cubeLength, theFace)
-		#  Return it to the caller
 		return newFace
 
+	#  Returns the cube-side-face-matrix (not the visual one)
 	def getTheSides (self):
 		return self .sideMatrix
 
+	#  Returns a specific face from that matrix
 	def getAFace (self, theFace, theXIndex, theYIndex):
 		return self .sideMatrix [theFace][theXIndex][theYIndex]
 
-	def printFaceCount (self):
+	#  Returns the number of faces currentlly stored in the cube-matrix
+	def getFaceCount (self):
 		#  Sum up the number of stored cubes by unwrapping the sideMatrix list
 		theCount = 0
 		for level1 in self .sideMatrix:
@@ -122,14 +119,15 @@ class RubiksCube:
 					theCount += 1
 		print ("%d faces counted." % theCount)
 
+	#  Asks each stored face to render itself - should be called every frame
 	def renderTheFaces (self):
-		#  Grab all the updated colour data, face-by-face
 		for currSide in self .visualMatrix:
 			for currLine in currSide:
 				for currFace in currLine:
 					#  Render the face
 					currFace .render ()
 
+	#  I'm doing you next, I promise!
 	def swapLines (self, line1: tuple, line2: tuple):
 		#  Function to rotate a slice of faces
 		#  We'll need a different way to select the slice being rotated

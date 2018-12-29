@@ -5,12 +5,12 @@
 ##  Notes
 
 #  Author:  Blair Edwards 2018
-#  Trying my best to abstract all the primitives info to its own file
+#  This now holds the CubeFace class, which is a visual part of the RubiksCube.
+#  The entire cube is built up of lots of these.
 
 import pyglet
 from pyglet .gl import *
 from preferences import *
-#from pygletHandler import *
 
 
 
@@ -32,14 +32,13 @@ class CubeFace:
 
 	def createTheFace (self):
 		#  Builds the cube's vertices
+
 		#  This now builds a "unit langth" model and scales it by the cubeLength
 		adjCubeLength = self .cubeLength / 10
 		#  Calculate the border "thickness"
 		b = int (adjCubeLength * userCubeFaceBorderMargin)
 
-		#  Instead of actually faffing around with 3D rotation, how's about
-		#  we just work it out manually instead?
-		#  Set as 0s initially, then transform to desired location
+		#  Calculate X, Y, Z starts and ends, according to our scaled lengths
 		xN = self .xPos
 		yN = self .yPos
 		zN = self .zPos
@@ -47,10 +46,13 @@ class CubeFace:
 		yF = self .yPos + int (adjCubeLength * 10)
 		zF = self .zPos + int (adjCubeLength * 10)
 
-		#  Good ol' lookup table for the correct vertices pattern
+		#  Good ol' lookup-table-algorithm for the correct vertices pattern
 		positionData = getFaceVertices (xN, yN, zN, xF, yF, zF, b, self .theFace)
 
-		#  Generate the colour printFaceCount
+		#  Calculate the number of vertices from the list of vertices
+		self .verticesCount = len (positionData) // 3
+
+		#  Generate the colours for the vertices
 		#  Currently black borders round the coloured face
 		colourData = []
 		for j in range (4):
@@ -58,12 +60,6 @@ class CubeFace:
 				colourData .append (userFaceColours[self .faceColour][k] / 255)
 		for l in range (48):
 			colourData .append (0)
-		#  This is left over from before and can probably disappear
-
-		#  Calculate the number of vertices
-		self .verticesCount = len (positionData) // 3
-
-		#  Rotate the face
 
 		#  Add all that to the internal vertex list
 		self .vertices = self .renderBatch .add (self .verticesCount, pyglet .gl .GL_QUADS, None,
@@ -71,31 +67,29 @@ class CubeFace:
 		    ('c3f', colourData)
 		)
 
+	#  Renders the cube face
 	def render (self):
 		self .renderBatch .draw ()
 
-
-	#  Positional Data
+	#  Returns positional data
 	def getPos (self):
 		return (self .xPos, self .yPos, self .zPos)
 	def getcubeLength (self):
 		return self .cubeLength
 
-	#  Vertices
+	#  Returns vertices data
 	def getVertices (self):
 		return self .vertices
-	def getVerticesType (self):
-		return self .verticesType
 	def getVerticesCount (self):
 		return self .verticesCount
 
-	#  Colours
+	#  Returns colour data
 	def getColours (self):
 		return self .colours
-	def getColoursType (self):
-		return self .coloursType
+
+	#  Changes the colour of the face - we'll be using this a lot :P
 	def setFaceColour (self, newFaceColour):
-		#  The first 12 points hold the coloured face data
+		#  The first 12 colour-vertices hold the colour data
 		newColours = []
 		for j in range (4):
 			for k in range (3):
@@ -104,6 +98,7 @@ class CubeFace:
 
 
 
+#  Super-simple lookup-algorithm-hybrid-thing to generate a face's vertices
 def getFaceVertices (xN, yN, zN, xF, yF, zF, b, whichFace):
 	#  Generate the vertices - don't ask how
 	if whichFace == 0:
