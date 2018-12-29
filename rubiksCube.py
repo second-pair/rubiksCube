@@ -12,9 +12,6 @@
 #  Dependencies:
 #  pyglet (pip-able)
 
-#  I've cannibalised this file to get started:
-#https://github.com/adamlwgriffiths/Pyglet/blob/master/examples/graphics.py
-
 
 
 #  Includes
@@ -28,13 +25,9 @@ from cubeMaths import *
 
 ##  Main Code
 pygletSetup ()
-#theRubiksCubeVisual .init (userCubeSize, userCubeLength, 0, 0, 0)
-#theRubiksCubeVisual .printCubeCount ()
-#theRubiksCubeVisual .rotateAFace (1, 'cw')
 
 theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
-theRubiksCube .printFaceCount ()
-#print (theRubiksCube .getTheSides ())
+print ("%d faces counted." % theRubiksCube .getFaceCount ())
 
 #  Setup complete!
 pyglet .app .run ()

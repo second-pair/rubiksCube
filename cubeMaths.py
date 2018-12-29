@@ -117,7 +117,7 @@ class RubiksCube:
 			for level2 in level1:
 				for level3 in level2:
 					theCount += 1
-		print ("%d faces counted." % theCount)
+		return theCount
 
 	#  Asks each stored face to render itself - should be called every frame
 	def renderTheFaces (self):
