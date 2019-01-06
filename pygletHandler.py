@@ -10,11 +10,11 @@
 #  I've cannibalised this file to get started:
 #https://github.com/adamlwgriffiths/Pyglet/blob/master/examples/graphics.py
 
+from preferences import *
 import pyglet
 from pyglet .gl import *
-from preferences import *
-from cubeMaths import *
 from primitives import mainRenderBatch
+#from cubeMaths import *
 
 
 
@@ -81,3 +81,4 @@ def pygletSetup ():
 
 #  Initialise rotation variables
 rx = ry = rz = 0
+pygletSetup ()

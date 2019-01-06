@@ -8,11 +8,8 @@
 #  This now holds the CubeFace class, which is a visual part of the RubiksCube.
 #  The entire cube is built up of lots of these.
 
-import pyglet
-from pyglet .gl import *
 from preferences import *
-
-
+from pyglet .gl import *
 
 mainRenderBatch = pyglet .graphics .Batch ()
 

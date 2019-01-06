@@ -15,8 +15,21 @@
 #  swap faces around, we do the equivalent of peeling off the stickers and
 #  placing them back where we want them.
 
+#  Need to account for rotating a whole face
+
 from preferences import *
-from primitives import *
+from primitives import CubeFace
+
+sideOpposites = {0: 5, 1: 3, 2: 4, 3: 1, 4: 2, 5: 0}
+sideRotations = {0: 0, 1: 3, 2: 0, 3: 1, 4: 0, 5: 0}
+#0 bottom
+#1 back
+#2 right
+#3 front
+#4 left
+#5 top
+
+
 
 class RubiksCube:
 	def __init__ (self):
@@ -120,14 +133,41 @@ class RubiksCube:
 		return theCount
 
 	#  I'm doing you next, I promise!
-	def swapLines (self, line1: tuple, line2: tuple):
+	def rotateSlice (self, startSide, destSide, startSideX, startSideY):
 		#  Function to rotate a slice of faces
-		#  We'll need a different way to select the slice being rotated
 
-		#  Figure out which items actually needto be swapped
+		#  How the indexing works:
+		#  To keep things simple, I'm having the indexing work by selecting
+		#  the face we're intending to move, then specifying a destination
+		#  side that we want it to end up at.
+
+		#  Determine the order of face-swapping
+		#  This is pretty simple, as we always want to select the faces in
+		#  rotating order as we go round the cube.  IE:
+		#  The first and second faces are provided to us,
+		#  The third face is opposite the first,
+		#  The fourth face is opposite the second.
+		theSides = (startSide, destSide, sideOpposites [startSide], sideOpposites [destSide])
+
+		#  Figure out which items actually need to be swapped
 		#  Due to how the indexing works, we'll need to account for skipping
 		#  across sub-lists
 
+		for aSide in theSides:
+			if sideRotations [aSide] == 0:
+				for i in range (self .cubeCount):
+					self .visualMatrix [aSide][startSideX][i] .setFaceColour (7 + i)
+			elif sideRotations [aSide] == 1:
+				for i in range (self .cubeCount):
+					self .visualMatrix [aSide][i][startSideY] .setFaceColour (7 + i)
+			elif sideRotations [aSide] == 2:
+				for i in range (self .cubeCount):
+					self .visualMatrix [aSide][startSideX][i] .setFaceColour (7 + i)
+			elif sideRotations [aSide] == 3:
+				for i in range (self .cubeCount):
+					self .visualMatrix [aSide][i][startSideY] .setFaceColour (7 + i)
+
+		'''
 		#  Start swapping
 		tempLine = []
 		for i in range (self .cubeCount):
@@ -143,5 +183,17 @@ class RubiksCube:
 		for i in range (self .cubeCount):
 			#  Use the temporary variable to fill in the final face-slice
 			sideMatrix [line4][i] = tempLine [i]
+		'''
+
+	def oneoff (self):
+		for i in range (1, 5):
+			self .visualMatrix [i][0][0] .setFaceColour (6)
+		self .rotateSlice (1, 2, 4, 4)
+		#for i in range (6):
+		#	self .visualMatrix [i][0][2] .setFaceColour (6)
+		#	self .visualMatrix [i][2][0] .setFaceColour (7)
+
+
+
 
 theRubiksCube = RubiksCube ()
