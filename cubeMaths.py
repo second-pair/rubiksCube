@@ -15,8 +15,6 @@
 #  swap faces around, we do the equivalent of peeling off the stickers and
 #  placing them back where we want them.
 
-#  Need to account for rotating a whole face
-
 from preferences import *
 from primitives import CubeFace
 
@@ -135,6 +133,7 @@ class RubiksCube:
 	#  I'm doing you next, I promise!
 	def rotateSlice (self, startSide, destSide, startSideX, startSideY):
 		#  Function to rotate a slice of faces
+		#  Need to account for rotating a whole face
 
 		#  How the indexing works:
 		#  To keep things simple, I'm having the indexing work by selecting
@@ -152,20 +151,55 @@ class RubiksCube:
 		#  Figure out which items actually need to be swapped
 		#  Due to how the indexing works, we'll need to account for skipping
 		#  across sub-lists
+		#  It might be worth determining an axis of rotation and going
+		#  from there?
 
+		sideStrips = []
+		for _ in range (4):
+			sideStrips .append ([])
+
+		#  Copy initial strip data to sideStrips
+		stripSegment = 0
+		for aSide in theSides:
+
+			if sideRotations [aSide] == 0:
+				for i in range (self .cubeCount):
+					sideStrips [stripSegment] .append (self .sideMatrix [aSide][startSideX][i])
+			elif sideRotations [aSide] == 1:
+				for i in range (self .cubeCount):
+					sideStrips [stripSegment] .append (self .sideMatrix [aSide][i][startSideY])
+			elif sideRotations [aSide] == 2:
+				for i in range (self .cubeCount):
+					sideStrips [stripSegment] .append (self .sideMatrix [aSide][self .cubeCount - startSideX - 1][self .cubeCount - i - 1])
+			elif sideRotations [aSide] == 3:
+				for i in range (self .cubeCount):
+					sideStrips [stripSegment] .append (self .sideMatrix [aSide][self .cubeCount - i - 1][self .cubeCount - startSideY - 1])
+			stripSegment += 1
+
+		#  Re-organise sideStrips
+		sideStrips .append (sideStrips [0])
+		sideStrips .pop (0)
+
+		#  Copy the shifted sideStrips back to their faces
+		stripSegment = 0
 		for aSide in theSides:
 			if sideRotations [aSide] == 0:
 				for i in range (self .cubeCount):
-					self .visualMatrix [aSide][startSideX][i] .setFaceColour (7 + i)
+					self .sideMatrix [aSide][startSideX][i] = sideStrips [stripSegment][i]
+					self .visualMatrix [aSide][startSideX][i] .setFaceColour (sideStrips [stripSegment][i])
 			elif sideRotations [aSide] == 1:
 				for i in range (self .cubeCount):
-					self .visualMatrix [aSide][i][startSideY] .setFaceColour (7 + i)
+					self .sideMatrix [aSide][i][startSideY] = sideStrips [stripSegment][i]
+					self .visualMatrix [aSide][i][startSideY] .setFaceColour (sideStrips [stripSegment][i])
 			elif sideRotations [aSide] == 2:
 				for i in range (self .cubeCount):
-					self .visualMatrix [aSide][startSideX][i] .setFaceColour (7 + i)
+					self .sideMatrix [aSide][self .cubeCount - startSideX - 1][self .cubeCount - i - 1] = sideStrips [stripSegment][i]
+					self .visualMatrix [aSide][self .cubeCount - startSideX - 1][self .cubeCount - i - 1] .setFaceColour (sideStrips [stripSegment][i])
 			elif sideRotations [aSide] == 3:
 				for i in range (self .cubeCount):
-					self .visualMatrix [aSide][i][startSideY] .setFaceColour (7 + i)
+					self .sideMatrix [aSide][self .cubeCount - i - 1][self .cubeCount - startSideY - 1] = sideStrips [stripSegment][i]
+					self .visualMatrix [aSide][self .cubeCount - i - 1][self .cubeCount - startSideY - 1] .setFaceColour (sideStrips [stripSegment][i])
+			stripSegment += 1
 
 		'''
 		#  Start swapping
@@ -185,10 +219,70 @@ class RubiksCube:
 			sideMatrix [line4][i] = tempLine [i]
 		'''
 
+
+	def rotateFace (self, theFace, direction):
+		#  Function to rotate a face CW or CCW
+		#  Tested somewhat and seems to work :)
+
+		#  Generate a new matrix to store the new face
+		tempSide = []
+		for i in range (self .cubeCount):
+			tempSide .append ([])
+			for j in range (self .cubeCount):
+				tempSide[i] .append ([])
+
+		#  Set up the Xs and Ys to count in the right directions
+		currX_ = 0
+		currY_ = 0
+		if direction == 0:
+			#  Rotating CW:
+			#  x -> -y
+			#  y -> x
+			newX_ = self .cubeCount - 1
+			newY_ = 0
+			newXStep = -1
+			newYStep = 1
+		else:
+			#  Rotating CCW:
+			#  x -> y
+			#  y -> -x
+			newX_ = 0
+			newY_ = self .cubeCount - 1
+			newXStep = 1
+			newYStep = -1
+
+		currY = currY_
+		newY = newY_
+		for _ in range (self .cubeCount):
+			#  Step along existing Y
+			currX = currX_
+			newX = newX_
+			for _ in range (self .cubeCount):
+				#  Step along existing X
+
+				#  Look up the existing colour
+				tempColour = self .sideMatrix [theFace][currX][currY]
+				#  Save that colour to the side and visual matrices
+				tempSide [newY][newX] = tempColour
+				self .visualMatrix [theFace][newY][newX] .setFaceColour (tempColour)
+
+				currX += 1
+				newX += newXStep
+			currY += 1
+			newY += newYStep
+
+		#  Assign the temporary side to the sideMatrix
+		self .sideMatrix [theFace] = tempSide
+
+
+
 	def oneoff (self):
-		for i in range (1, 5):
-			self .visualMatrix [i][0][0] .setFaceColour (6)
-		self .rotateSlice (1, 2, 4, 4)
+		for i in range (6):
+			self .sideMatrix [i][0][0] = ((i + 1) % 6)
+			self .visualMatrix [i][0][0] .setFaceColour ((i + 1) % 6)
+			pass
+		self .rotateSlice (1, 2, 4, 2)
+
 		#for i in range (6):
 		#	self .visualMatrix [i][0][2] .setFaceColour (6)
 		#	self .visualMatrix [i][2][0] .setFaceColour (7)

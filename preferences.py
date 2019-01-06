@@ -9,10 +9,10 @@
 userScreenWidth = 1000
 userScreenHeight = 800
 #userCameraDistance = -250
-userCameraDistance = -150
+userCameraDistance = -250
 
 #  Cube Parameters
-userCubeSize = 5
+userCubeSize = 11
 userCubeLength = 20
 userCubeFaceBorderMargin = 1.3
 userCubeSpacing = 1
