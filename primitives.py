@@ -14,9 +14,13 @@ from preferences import *
 
 
 
+mainRenderBatch = pyglet .graphics .Batch ()
+
+
+
 class CubeFace:
-	def __init__ (self):
-		self .renderBatch = pyglet .graphics .Batch ()
+	def __init__ (self, ):
+		pass
 
 	def init (self, xPos = 0, yPos = 0, zPos = 0, cubeLength = userCubeLength, theFace = 0):
 		self .xPos = xPos - int (cubeLength / 2)
@@ -62,14 +66,13 @@ class CubeFace:
 			colourData .append (0)
 
 		#  Add all that to the internal vertex list
-		self .vertices = self .renderBatch .add (self .verticesCount, pyglet .gl .GL_QUADS, None,
+		#self .vertices = self .renderBatch .add (self .verticesCount, pyglet .gl .GL_QUADS, None,
+		#self .vertices = pyglet .graphics .vertex_list (self .verticesCount,
+		#self .vertices = mainRenderBatch .add_indexed (self .verticesCount, pyglet .gl .GL_QUADS, None, self .faceIndex,
+		self .vertices = mainRenderBatch .add (self .verticesCount, pyglet .gl .GL_QUADS, None,
 		    ('v3i', positionData),
 		    ('c3f', colourData)
 		)
-
-	#  Renders the cube face
-	def render (self):
-		self .renderBatch .draw ()
 
 	#  Returns positional data
 	def getPos (self):

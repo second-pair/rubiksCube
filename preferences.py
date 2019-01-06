@@ -4,8 +4,10 @@
 #  Parameters & Globals
 
 #  Programme Parameters
-userScreenWidth = 1800
-userScreenHeight = 1000
+#userScreenWidth = 1800
+#userScreenHeight = 1000
+userScreenWidth = 1000
+userScreenHeight = 800
 #userCameraDistance = -250
 userCameraDistance = -150
 

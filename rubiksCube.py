@@ -26,6 +26,7 @@ from cubeMaths import *
 ##  Main Code
 pygletSetup ()
 
+#  Generate the cube
 theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
 print ("%d faces counted." % theRubiksCube .getFaceCount ())
 

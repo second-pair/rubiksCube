@@ -119,14 +119,6 @@ class RubiksCube:
 					theCount += 1
 		return theCount
 
-	#  Asks each stored face to render itself - should be called every frame
-	def renderTheFaces (self):
-		for currSide in self .visualMatrix:
-			for currLine in currSide:
-				for currFace in currLine:
-					#  Render the face
-					currFace .render ()
-
 	#  I'm doing you next, I promise!
 	def swapLines (self, line1: tuple, line2: tuple):
 		#  Function to rotate a slice of faces

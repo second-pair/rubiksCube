@@ -14,6 +14,7 @@ import pyglet
 from pyglet .gl import *
 from preferences import *
 from cubeMaths import *
+from primitives import mainRenderBatch
 
 
 
@@ -54,7 +55,7 @@ def on_draw ():
 	glRotated (rx, 1, 0, 0)
 	glRotatef (ry, 0, 1, 0)
 	glRotatef (rz, 0, 0, 1)
-	theRubiksCube .renderTheFaces ()
+	mainRenderBatch .draw ()
 
 #  Add toggle-to-pause
 @window .event
