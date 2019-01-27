@@ -11,10 +11,15 @@ userScreenHeight = 800
 #userCameraDistance = -250
 userCameraDistance = -250
 
+#  Matrices Window
+showMatricesWindow = 1
+matricesWindowScale = 6
+matricesWindowCorrection = 2
+
 #  Cube Parameters
-userCubeSize = 11
+userCubeSize = 5
 userCubeLength = 20
-userCubeFaceBorderMargin = 1.3
+userCubeFaceBorderMargin = 1#.28
 userCubeSpacing = 1
 userStartingFace = 1
 

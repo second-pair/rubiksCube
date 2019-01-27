@@ -18,6 +18,15 @@
 from preferences import *
 from primitives import CubeFace
 
+#  Setup Tk, if required
+if showMatricesWindow == 1:
+	import tkinter as tk
+	#  Setup the root window
+	root = tk .Tk ()
+	root .title ("Matrices Window")
+	#  Setup DPI Scaling
+	root .tk .call ('tk', 'scaling', (userCubeSize + matricesWindowCorrection / userCubeSize) / (matricesWindowScale * root .winfo_screenheight () / 1080))
+
 sideOpposites = {0: 5, 1: 3, 2: 4, 3: 1, 4: 2, 5: 0}
 sideRotations = {0: 0, 1: 3, 2: 0, 3: 1, 4: 0, 5: 0}
 #0 bottom
@@ -33,6 +42,7 @@ class RubiksCube:
 	def __init__ (self):
 		self .sideMatrix = []
 		self .visualMatrix = []
+		self .matrixViewerData = []
 
 	def init (self, cubeCount = userCubeSize, cubeLength = userCubeLength, xPos = 0, yPos = 0, zPos = 0):
 		self .cubeCount = cubeCount
@@ -45,6 +55,9 @@ class RubiksCube:
 
 		self .generateSideMatrix ()
 		self .generateVisualCube ()
+		if showMatricesWindow == 1:
+			self .buildMatrixViewer ()
+
 
 	#  Generates a matrix of matrices of matrices to hold the cube's faces and
 	#  face-statuses
@@ -58,6 +71,36 @@ class RubiksCube:
 
 				for k in range (self .cubeCount):
 					self .sideMatrix [i][j] .append (i)
+
+	def buildMatrixViewer (self):
+		#  Generate the face labels
+		self .bMVGFL (1, 3, self .getASide2D (0))
+		self .bMVGFL (3, 3, self .getASide2D (1))
+		self .bMVGFL (3, 1, self .getASide2D (2))
+		self .bMVGFL (3, 5, self .getASide2D (3))
+		self .bMVGFL (5, 3, self .getASide2D (4))
+		self .bMVGFL (7, 3, self .getASide2D (5))
+
+		#  Generate vertical spacers
+		for i in range (4):
+			self .bMVGFL (1, i * 2, " ")
+		#  Generate horizontal spacer(s)
+		self .bMVGFL (0, 3, " ")
+
+		#  Position properly
+		root .geometry ("+%d+%d" % (root .winfo_screenwidth () - root .winfo_width (), 0))
+
+	def bMVGFL (self, row, column, text):
+		#  build Matrix Viewer Generate Face Label
+		newLabel = tk .Label (root, text = text)
+		newLabel .grid (row = row, column = column)
+		self .matrixViewerData .append (newLabel)
+
+	def matrixViewerUpdate (self):
+		for i in range (6):
+			self .matrixViewerData [i]['text'] = self .getASide2D (i)
+		root .update ()
+
 
 	#  Generates a matrix of matrices of matrices to hold the cube's visual info
 	def generateVisualCube (self):
@@ -116,6 +159,21 @@ class RubiksCube:
 	def getTheSides (self):
 		return self .sideMatrix
 
+
+	def getASide (self, theSide):
+		return self .sideMatrix [theSide]
+
+	def getASide2D (self, theSide):
+		#  Flatten out a side matrix into a text-based 2D representative (or tuple of texts)
+		the2DSide = ""
+		for sideSlice in self .getASide (theSide):
+			#  Unwrap each sub-matrix
+			for currValue in sideSlice:
+				the2DSide += str (currValue)
+			#the2DSide .append (tempSlice)
+			the2DSide += "\n"
+		return the2DSide
+
 	#  Returns a specific face from that matrix
 	def getAFace (self, theFace, theXIndex, theYIndex):
 		return self .sideMatrix [theFace][theXIndex][theYIndex]
@@ -129,6 +187,7 @@ class RubiksCube:
 				for level3 in level2:
 					theCount += 1
 		return theCount
+
 
 	#  I'm doing you next, I promise!
 	def rotateSlice (self, startSide, destSide, startSideX, startSideY):
@@ -219,7 +278,6 @@ class RubiksCube:
 			sideMatrix [line4][i] = tempLine [i]
 		'''
 
-
 	def rotateFace (self, theFace, direction):
 		#  Function to rotate a face CW or CCW
 		#  Tested somewhat and seems to work :)
@@ -277,6 +335,8 @@ class RubiksCube:
 
 
 	def oneoff (self):
+		#self .rotateFace (2, 0)
+
 		for i in range (6):
 			self .sideMatrix [i][0][0] = ((i + 1) % 6)
 			self .visualMatrix [i][0][0] .setFaceColour ((i + 1) % 6)

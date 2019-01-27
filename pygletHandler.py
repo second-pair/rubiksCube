@@ -14,7 +14,8 @@ from preferences import *
 import pyglet
 from pyglet .gl import *
 from primitives import mainRenderBatch
-#from cubeMaths import *
+if showMatricesWindow == 1:
+	from cubeMaths import theRubiksCube
 
 
 
@@ -56,6 +57,8 @@ def on_draw ():
 	glRotatef (ry, 0, 1, 0)
 	glRotatef (rz, 0, 0, 1)
 	mainRenderBatch .draw ()
+	if showMatricesWindow == 1:
+		theRubiksCube .matrixViewerUpdate ()
 
 #  Add toggle-to-pause
 @window .event
