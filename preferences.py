@@ -19,13 +19,21 @@ matricesWindowCorrection = 2
 #  Cube Parameters
 userCubeSize = 5
 userCubeLength = 20
-userCubeFaceBorderMargin = 1#.28
+userCubeFaceBorderMargin = 1
 userCubeSpacing = 1
 userStartingFace = 1
 
 #  Colours
 userBackgroundColour = (40, 43, 53)
-userFaceColours = (
+userFaceColours = (	#  Easy dev colours
+	(0, 0, 0),		#  0 - Black
+	(255, 0, 0),	#  1 - Red
+	(0, 255, 0),	#  2 - Green
+	(0, 0, 255),	#  3 - Blue
+	(127,127, 127),	#  4 - Grey
+	(255, 255, 255),#  5 - White
+)
+'''(
     (251, 9, 44),
     (70, 225, 69),
     (253, 144, 80),
@@ -38,7 +46,7 @@ userFaceColours = (
     (160, 160, 160),
     (140, 140, 140),
     (120, 120, 120),
-)
+)'''
 
 #  Solving Parameters
 #starting face

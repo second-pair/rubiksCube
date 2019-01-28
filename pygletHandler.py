@@ -21,6 +21,8 @@ if showMatricesWindow == 1:
 
 #  Initialise the window
 window = pyglet .window .Window (userScreenWidth, userScreenHeight, resizable = True)
+window .set_location (2000, 0)
+window .activate ()
 spinTheCube = True
 
 #  Really this is an Init thing, despite being on_resize
@@ -39,7 +41,7 @@ def on_resize (width, height):
 def update (dt):
 	global rx, ry, rz
 	if spinTheCube:
-		rx += dt * 5
+		rx += dt * 11
 		ry += dt * 15
 		rz += dt * 5
 		rx %= 360
@@ -58,7 +60,7 @@ def on_draw ():
 	glRotatef (rz, 0, 0, 1)
 	mainRenderBatch .draw ()
 	if showMatricesWindow == 1:
-		theRubiksCube .matrixViewerUpdate ()
+		theRubiksCube .matricesViewerUpdate ()
 
 #  Add toggle-to-pause
 @window .event
