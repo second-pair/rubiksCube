@@ -58,7 +58,7 @@ class RubiksCube:
 		#  Maybe these want to be classes one day?
 		self .sideMatrix = []
 		self .visualMatrix = []
-		self .MatricesViewerData = []
+		self .matricesViewerData = []
 
 	def init (self, cubeCount = userCubeSize, cubeLength = userCubeLength, xPos = 0, yPos = 0, zPos = 0):
 		self .cubeCount = cubeCount
@@ -167,11 +167,11 @@ class RubiksCube:
 		#  build Matrix Viewer Generate Face Label
 		newLabel = tk .Label (root, text = text)
 		newLabel .grid (row = row, column = column)
-		self .MatricesViewerData .append (newLabel)
+		self .matricesViewerData .append (newLabel)
 
-	def MatricesViewerUpdate (self):
+	def matricesViewerUpdate (self):
 		for i in range (6):
-			 self .MatricesViewerData [i]['text'] = self .getASide2D (i)
+			 self .matricesViewerData [i]['text'] = self .getASide2D (i)
 		root .update ()
 
 
@@ -216,7 +216,10 @@ class RubiksCube:
 
 
 	#  I'm doing you next, I promise!
+	#  I lied.
 	def rotateSlice (self, startSide, destSide, segNumber):
+		return
+
 		#  Function to rotate a slice of faces
 		#  Need to account for rotating a whole face
 
@@ -304,10 +307,11 @@ class RubiksCube:
 			sideMatrix [line4][i] = tempLine [i]
 		'''
 
-	def rotateFace (self, theFace, direction, depth):
+	def rotateFace (self, theFace, direction, segDepth):
 		#  Function to rotate a face CW or CCW
 		#  Tested somewhat and seems to work :)
-		#  Need to add rotating the slice that touches the face
+		#  Need to ensure we don't rotate the whole face
+		#  Either that, or also rotate the abck face, but why bother?
 
 		#  Generate a new matrix to store the new face
 		tempSide = []
@@ -359,15 +363,90 @@ class RubiksCube:
 		#  Assign the temporary side to the sideMatrix
 		self .sideMatrix [theFace] = tempSide
 
-		#  call self .rotateSlice (stuff, use sideSliceMap)
+		#  Handle the segments
+		#  Iterate through each layer
+		for currDepth in range (segDepth + 1):
+			#  Firstly, store the first segment, so it can be overwritten
+			tempSegment = self .getSingleSegment (sideNeighbours [theFace][0][0], sideNeighbours [theFace][0][1], currDepth)
+
+			#  Determine direction of rotation / copy
+			if direction == 0:
+				#  Next, copy each segment round one direction
+				self .setSingleSegment (sideNeighbours [theFace][0][0], sideNeighbours [theFace][0][1], currDepth,
+					self .getSingleSegment (sideNeighbours [theFace][3][0], sideNeighbours [theFace][3][1], currDepth))
+
+				self .setSingleSegment (sideNeighbours [theFace][3][0], sideNeighbours [theFace][3][1], currDepth,
+					self .getSingleSegment (sideNeighbours [theFace][2][0], sideNeighbours [theFace][2][1], currDepth))
+
+				self .setSingleSegment (sideNeighbours [theFace][2][0], sideNeighbours [theFace][2][1], currDepth,
+					self .getSingleSegment (sideNeighbours [theFace][1][0], sideNeighbours [theFace][1][1], currDepth))
+
+				#  Lastly, copy the stored segment to the last position
+				self .setSingleSegment (sideNeighbours [theFace][1][0], sideNeighbours [theFace][1][1], currDepth, tempSegment)
+
+			elif direction == 1:
+				self .setSingleSegment (sideNeighbours [theFace][0][0], sideNeighbours [theFace][0][1], currDepth,
+					self .getSingleSegment (sideNeighbours [theFace][1][0], sideNeighbours [theFace][1][1], currDepth))
+
+				self .setSingleSegment (sideNeighbours [theFace][1][0], sideNeighbours [theFace][1][1], currDepth,
+					self .getSingleSegment (sideNeighbours [theFace][2][0], sideNeighbours [theFace][2][1], currDepth))
+
+				self .setSingleSegment (sideNeighbours [theFace][2][0], sideNeighbours [theFace][2][1], currDepth,
+					self .getSingleSegment (sideNeighbours [theFace][3][0], sideNeighbours [theFace][3][1], currDepth))
+
+				self .setSingleSegment (sideNeighbours [theFace][3][0], sideNeighbours [theFace][3][1], currDepth, tempSegment)
+
+		return
+
+
+
+
+	def getSingleSegment (self, face, extremity, depthNear):
+		#  Gets a single segment from a face, given the face and which side to get it from
+		depthFar = self .cubeCount - depthNear - 1
+		theSegment = []
+		if extremity == 0:
+			for i in range (self .cubeCount):
+				theSegment .append (self .sideMatrix [face][i][depthNear])
+		elif extremity == 1:
+			for i in range (self .cubeCount):
+				theSegment .append (self .sideMatrix [face][depthNear][i])
+		elif extremity == 2:
+			for i in range (self .cubeCount):
+				theSegment .append (self .sideMatrix [face][i][depthFar])
+		elif extremity == 3:
+			for i in range (self .cubeCount):
+				theSegment .append (self .sideMatrix [face][depthFar][i])
+		return theSegment
+
+	def setSingleSegment (self, face, extremity, depthNear, theSegment):
+		#  Writes a single segment to a face, given the position of said segment
+		depthFar = self .cubeCount - depthNear - 1
+		if extremity == 0:
+			for i in range (self .cubeCount):
+				self .sideMatrix [face][i][depthNear] = theSegment [i]
+				self .visualMatrix [face][i][depthNear] .setFaceColour (theSegment [i])
+		elif extremity == 1:
+			for i in range (self .cubeCount):
+				self .sideMatrix [face][depthNear][i] = theSegment [i]
+				self .visualMatrix [face][depthNear][i] .setFaceColour (theSegment [i])
+		elif extremity == 2:
+			for i in range (self .cubeCount):
+				self .sideMatrix [face][i][depthFar] = theSegment [i]
+				self .visualMatrix [face][i][depthFar] .setFaceColour (theSegment [i])
+		elif extremity == 3:
+			for i in range (self .cubeCount):
+				self .sideMatrix [face][depthFar][i] = theSegment [i]
+				self .visualMatrix [face][depthFar][i] .setFaceColour (theSegment [i])
+		return
 
 
 
 	def oneoff (self):
-		for i in range (6):
-			self .sideMatrix [i][0][1] = ((i + 1) % 6)
-			self .visualMatrix [i][0][1] .setFaceColour ((i + 1) % 6)
-		self .rotateSlice (3, 4, 3)
+		self .rotateFace (0, 1, 1)
+		self .rotateFace (2, 1, 1)
+		self .rotateFace (1, 1, 1)
+		return
 
 
 

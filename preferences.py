@@ -32,6 +32,7 @@ userFaceColours = (	#  Easy dev colours
 	(0, 0, 255),	#  3 - Blue
 	(127,127, 127),	#  4 - Grey
 	(255, 255, 255),#  5 - White
+	(210, 0, 160),
 )
 '''(
     (251, 9, 44),

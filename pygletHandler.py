@@ -40,10 +40,11 @@ def on_resize (width, height):
 #  Update our viewport's rotation
 def update (dt):
 	global rx, ry, rz
+	rotateScale = 2
 	if spinTheCube:
-		rx += dt * 11
-		ry += dt * 15
-		rz += dt * 5
+		rx += dt * 11 * rotateScale
+		ry += dt * 15 * rotateScale
+		rz += dt * 5 * rotateScale
 		rx %= 360
 		ry %= 360
 		rz %= 360
