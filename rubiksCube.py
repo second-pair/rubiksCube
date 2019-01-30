@@ -20,16 +20,19 @@ from preferences import *
 import pyglet
 import pygletHandler
 from cubeMaths import theRubiksCube
+import threading
 
 
 
 ##  Main Code
+funcRef = "main"
 
 #  Generate the cube
 theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
-print ("%d faces counted." % theRubiksCube .getFaceCount ())
 
-theRubiksCube .oneoff ()
+#  Shuffle the cube
+shuffler = threading .Thread (target = theRubiksCube .shuffle)
+shuffler .start()
 
 #  Setup complete!
 pyglet .app .run ()

@@ -29,6 +29,7 @@ spinTheCube = True
 #  Seems to sort the depth problem
 @window.event
 def on_resize (width, height):
+	funcRef = "on_resize"
 	#  Override the default on_resize handler to create a 3D projection
 	glViewport (0, 0, width, height)
 	glMatrixMode (GL_PROJECTION)
@@ -39,12 +40,13 @@ def on_resize (width, height):
 
 #  Update our viewport's rotation
 def update (dt):
+	funcRef = "update"
+	#  Main render update loop
 	global rx, ry, rz
-	rotateScale = 2
 	if spinTheCube:
-		rx += dt * 11 * rotateScale
-		ry += dt * 15 * rotateScale
-		rz += dt * 5 * rotateScale
+		rx += dt * 11 * userCubeRotateRate
+		ry += dt * 15 * userCubeRotateRate
+		rz += dt * 5 * userCubeRotateRate
 		rx %= 360
 		ry %= 360
 		rz %= 360
@@ -52,13 +54,16 @@ def update (dt):
 #  Refresh and render the view
 @window .event
 def on_draw ():
-#	window .clear ()
+	funcRef = "on_draw"
+
+	#window .clear ()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 	glLoadIdentity()
 	glTranslatef(0, 0, userCameraDistance)
 	glRotated (rx, 1, 0, 0)
 	glRotatef (ry, 0, 1, 0)
 	glRotatef (rz, 0, 0, 1)
+
 	mainRenderBatch .draw ()
 	if showMatricesWindow == 1:
 		theRubiksCube .matricesViewerUpdate ()
@@ -66,11 +71,13 @@ def on_draw ():
 #  Add toggle-to-pause
 @window .event
 def on_mouse_press (x, y, button, modifiers):
+	funcRef = "on_mouse_press"
 	if button == pyglet .window .mouse .LEFT:
 		global spinTheCube
 		spinTheCube = not spinTheCube
 @window .event
 def on_key_press (symbol, modifiers):
+	funcRef = "on_key_press"
 	if symbol == pyglet .window .key .SPACE:
 		global spinTheCube
 		spinTheCube = not spinTheCube
@@ -79,11 +86,15 @@ def on_key_press (symbol, modifiers):
 
 #  One-time GL setup
 def pygletSetup ():
+	funcRef = "pygletSetup"
+
 	glClearColor (userBackgroundColour[0] / 255, userBackgroundColour[1] / 255, userBackgroundColour[2] / 255, 0)
 	#glColor3f  (25.0 /255, 196.0 / 255, 241.0 / 255)
 	glEnable (GL_DEPTH_TEST)
-#	glEnable (GL_CULL_FACE)
-	pyglet .clock .schedule (update)
+
+	#pyglet.clock.set_fps_limit(60)
+	#pyglet .clock .schedule (update)
+	pyglet .clock .schedule_interval (update, 1.0/60.0)
 
 #  Initialise rotation variables
 rx = ry = rz = 0

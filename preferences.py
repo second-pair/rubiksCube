@@ -2,17 +2,30 @@
 
 #  Author:  Blair Edwards 2018
 #  Parameters & Globals
+#  Feeling like this is gonna need its own major commenting soon.
+
+#  Error function
+#  I've put this here, as it's currently the only thinkg imported by evverything.
+from datetime import datetime
+def die (callingFunction, theErrorText):
+	log (callingFunction, theErrorText)
+	exit ()
+
+def log (callingFunction, theErrorText):
+	print ("[%s]  %s:  %s" % (datetime .now (), callingFunction, theErrorText))
 
 #  Programme Parameters
+#  I should smart-DPI this again
 #userScreenWidth = 1800
 #userScreenHeight = 1000
 userScreenWidth = 1000
 userScreenHeight = 800
 #userCameraDistance = -250
 userCameraDistance = -250
+userMovePeriod = 0.02
 
 #  Matrices Window
-showMatricesWindow = 1
+showMatricesWindow = 0
 matricesWindowScale = 6
 matricesWindowCorrection = 2
 
@@ -22,6 +35,8 @@ userCubeLength = 20
 userCubeFaceBorderMargin = 1
 userCubeSpacing = 1
 userStartingFace = 1
+userCubeRotateRate = 2
+cubeShuffleAmount = 100
 
 #  Colours
 userBackgroundColour = (40, 43, 53)
@@ -32,7 +47,6 @@ userFaceColours = (	#  Easy dev colours
 	(0, 0, 255),	#  3 - Blue
 	(127,127, 127),	#  4 - Grey
 	(255, 255, 255),#  5 - White
-	(210, 0, 160),
 )
 '''(
     (251, 9, 44),

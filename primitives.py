@@ -20,6 +20,8 @@ class CubeFace:
 		pass
 
 	def init (self, xPos = 0, yPos = 0, zPos = 0, cubeLength = userCubeLength, theFace = 0):
+		funcRef = "CubeFace .init"
+		#  Manually called init function
 		self .xPos = xPos - int (cubeLength / 2)
 		self .yPos = yPos - int (cubeLength / 2)
 		self .zPos = zPos - int (cubeLength / 2)
