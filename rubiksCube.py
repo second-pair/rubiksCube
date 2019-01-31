@@ -31,7 +31,7 @@ funcRef = "main"
 theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
 
 #  Shuffle the cube
-shuffler = threading .Thread (target = theRubiksCube .shuffle)
+shuffler = threading .Thread (target = theRubiksCube .solve)
 shuffler .start()
 
 #  Setup complete!

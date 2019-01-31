@@ -32,17 +32,40 @@ if showMatricesWindow == 1:
 
 #  This puppy, well...
 #  First value is the face you're looking at
-#  Second value pair (first sub-tuple) is a neighbouring face and the closest
+#  Second value (first sub-tuple pair) is a neighbouring face and the closest
 #  of its sides, out of x-close, y-close, x-far, y-far
+#  This is in the same order as the x-close etc order
 #  Third value pair is the next clockwise face and etc.
 #  This garbage make a bit more sense if you stare at the Matrices Viewer
 sideNeighbours = {
 0: ((1, 2), (4, 0), (3, 0), (2, 0)),
-1: ((0, 0), (2, 3), (5, 2), (4, 1)),
+1: ((5, 2), (4, 1), (0, 0), (2, 3)),
 2: ((0, 3), (3, 3), (5, 3), (1, 3)),
 3: ((0, 2), (4, 3), (5, 0), (2, 1)),
 4: ((0, 1), (1, 1), (5, 1), (3, 1)),
-5: ((1, 0), (2, 2), (3, 2), (4, 2)),
+5: ((3, 2), (4, 2), (1, 0), (2, 2)),
+}
+sideNeighboursReverse = {
+0: {1: 2, 4: 0, 3: 0, 2: 0},
+1: {5: 2, 4: 1, 0: 0, 2: 3},
+2: {0: 3, 3: 3, 5: 3, 1: 3},
+3: {0: 2, 4: 3, 5: 0, 2: 1},
+4: {0: 1, 1: 1, 5: 1, 3: 1},
+5: {3: 2, 4: 2, 1: 0, 2: 2},
+}
+sideOpposites = {
+0: 5,
+1: 3,
+2: 4,
+3: 1,
+4: 2,
+5: 0,
+}
+turnDiffs = {
+0: (0, 1, 2, -1),
+1: (-1, 0, 1, 2),
+2: (2, -1, 0, 1),
+3: (1, 2, -1, 0),
 }
 #  0 -> bottom
 #  1 -> back
@@ -50,6 +73,11 @@ sideNeighbours = {
 #  3 -> front
 #  4 -> left
 #  5 -> top
+#
+#  0 -> x-close
+#  1 -> y-close
+#  2 -> x-far
+#  3 -> y-far
 
 
 
@@ -129,8 +157,8 @@ class RubiksCube:
 
 	def generateSideMatrix (self):
 		funcRef = "RubiksCube .generateSideMatrix"
-		#  Generates a matrix of matrices of matrices to hold the cube's faces and
-		#  face-statuses
+		#  Generates a matrix of matrices of matrices to hold the cube's faces
+		#  and face-statuses
 
 		#  Generate each side
 		for currSide in range (6):
@@ -145,7 +173,8 @@ class RubiksCube:
 
 	def generateVisualCube (self):
 		funcRef = "RubiksCube .generateVisualCube"
-		#  Generates a matrix of matrices of matrices to hold the cube's visual info
+		#  Generates a matrix of matrices of matrices to hold the cube's
+		#  visual info
 
 		for currSide in range (6):
 			self .visualMatrix .append ([])
@@ -168,7 +197,8 @@ class RubiksCube:
 
 	def getASide2D (self, theSide):
 		funcRef = "RubiksCube .getASide2D"
-		#  Flatten out a side matrix into a text-based 2D representative (or tuple of texts)
+		#  Flatten out a side matrix into a text-based 2D representative
+		#  (or tuple of texts)
 		the2DSide = ""
 		#  Unwrap each sub-matrix
 		#  Note that to get an "as taught in school" grid, we need to mess with
@@ -245,11 +275,15 @@ class RubiksCube:
 
 	##  Rotation Functions
 
-	def rotateAFace (self, theFace, direction, segDepth):
-		funcRef = "RubiksCube .rotateAFace"
+	def rotateASide (self, theSide, direction, segDepth):
+		funcRef = "RubiksCube .rotateASide"
 		#  Function to rotate a face CW or CCW
-		#  Need to ensure we don't rotate the whole cube
-		#  Either that, or also rotate the back face, but why bother?
+		#  Need to ensure we don't rotate beyond half-way, since this'll
+		#  break the cube-solving logic (the faces are basically hard-coded).
+		if segDepth >= self .cubeCount // 2:
+			die (funcRef, "Trying to rotate beyond half-way point (`segDepth` = %d)" % segDepth)
+
+		sleep (self .updatePeriod)
 
 		#  Generate a new matrix to store the new face
 		tempSide = []
@@ -288,10 +322,10 @@ class RubiksCube:
 				#  Step along existing X
 
 				#  Look up the existing colour
-				tempColour = self .sideMatrix [theFace][currX][currY]
+				tempColour = self .sideMatrix [theSide][currX][currY]
 				#  Save that colour to the side and visual matrices
 				tempSide [newY][newX] = tempColour
-				self .visualMatrix [theFace][newY][newX] .setFaceColour (tempColour)
+				self .visualMatrix [theSide][newY][newX] .setFaceColour (tempColour)
 
 				currX += 1
 				newX += newXStep
@@ -299,118 +333,137 @@ class RubiksCube:
 			newY += newYStep
 
 		#  Assign the temporary side to the sideMatrix
-		self .sideMatrix [theFace] = tempSide
+		self .sideMatrix [theSide] = tempSide
 
 		#  Handle the segments
 		#  Iterate through each layer
 		for currDepth in range (segDepth + 1):
-			self .rotateASegment (theFace, direction, currDepth)
+			self .rotateASegment (theSide, direction, currDepth)
 
 		#  Log the rotation and foxtrott oscar
-		self .recordMove (theFace, direction, segDepth)
+		self .recordMove (theSide, direction, segDepth)
 		return
 
-	def rotateASegment (self, theFace, direction, currDepth):
+	def rotateASegment (self, theSide, direction, currDepth):
 		funcRef = "RubiksCube .rotateASegment"
-		#  Function to rotate a single segment, either clockwise or anti-clockwise.
+		#  Function to rotate a single segment, either clockwise or
+		#  anti-clockwise.
 		#  This is the sort of thing a compiled language would be great for.
 
 		#  Firstly, store the first segment, so it can be overwritten
-		tempSegment = self .getSingleSegment (sideNeighbours [theFace][0][0], sideNeighbours [theFace][0][1], currDepth)
+		tempSegment = self .getSingleSegment (sideNeighbours [theSide][0][0], sideNeighbours [theSide][0][1], currDepth)
 
 		#  Determine direction of rotation / copy
 		if direction == 0:
 			#  Next, copy each segment round one direction
-			self .setSingleSegment (sideNeighbours [theFace][0][0], sideNeighbours [theFace][0][1], currDepth,
-				self .getSingleSegment (sideNeighbours [theFace][3][0], sideNeighbours [theFace][3][1], currDepth))
+			self .setSingleSegment (sideNeighbours [theSide][0][0], sideNeighbours [theSide][0][1], currDepth,
+				self .getSingleSegment (sideNeighbours [theSide][3][0], sideNeighbours [theSide][3][1], currDepth))
 
-			self .setSingleSegment (sideNeighbours [theFace][3][0], sideNeighbours [theFace][3][1], currDepth,
-				self .getSingleSegment (sideNeighbours [theFace][2][0], sideNeighbours [theFace][2][1], currDepth))
+			self .setSingleSegment (sideNeighbours [theSide][3][0], sideNeighbours [theSide][3][1], currDepth,
+				self .getSingleSegment (sideNeighbours [theSide][2][0], sideNeighbours [theSide][2][1], currDepth))
 
-			self .setSingleSegment (sideNeighbours [theFace][2][0], sideNeighbours [theFace][2][1], currDepth,
-				self .getSingleSegment (sideNeighbours [theFace][1][0], sideNeighbours [theFace][1][1], currDepth))
+			self .setSingleSegment (sideNeighbours [theSide][2][0], sideNeighbours [theSide][2][1], currDepth,
+				self .getSingleSegment (sideNeighbours [theSide][1][0], sideNeighbours [theSide][1][1], currDepth))
 
 			#  Lastly, copy the stored segment to the last position
-			self .setSingleSegment (sideNeighbours [theFace][1][0], sideNeighbours [theFace][1][1], currDepth, tempSegment)
+			self .setSingleSegment (sideNeighbours [theSide][1][0], sideNeighbours [theSide][1][1], currDepth, tempSegment)
 
 		elif direction == 1:
-			self .setSingleSegment (sideNeighbours [theFace][0][0], sideNeighbours [theFace][0][1], currDepth,
-				self .getSingleSegment (sideNeighbours [theFace][1][0], sideNeighbours [theFace][1][1], currDepth))
+			self .setSingleSegment (sideNeighbours [theSide][0][0], sideNeighbours [theSide][0][1], currDepth,
+				self .getSingleSegment (sideNeighbours [theSide][1][0], sideNeighbours [theSide][1][1], currDepth))
 
-			self .setSingleSegment (sideNeighbours [theFace][1][0], sideNeighbours [theFace][1][1], currDepth,
-				self .getSingleSegment (sideNeighbours [theFace][2][0], sideNeighbours [theFace][2][1], currDepth))
+			self .setSingleSegment (sideNeighbours [theSide][1][0], sideNeighbours [theSide][1][1], currDepth,
+				self .getSingleSegment (sideNeighbours [theSide][2][0], sideNeighbours [theSide][2][1], currDepth))
 
-			self .setSingleSegment (sideNeighbours [theFace][2][0], sideNeighbours [theFace][2][1], currDepth,
-				self .getSingleSegment (sideNeighbours [theFace][3][0], sideNeighbours [theFace][3][1], currDepth))
+			self .setSingleSegment (sideNeighbours [theSide][2][0], sideNeighbours [theSide][2][1], currDepth,
+				self .getSingleSegment (sideNeighbours [theSide][3][0], sideNeighbours [theSide][3][1], currDepth))
 
-			self .setSingleSegment (sideNeighbours [theFace][3][0], sideNeighbours [theFace][3][1], currDepth, tempSegment)
+			self .setSingleSegment (sideNeighbours [theSide][3][0], sideNeighbours [theSide][3][1], currDepth, tempSegment)
 		return
 
-	def getSingleSegment (self, face, extremity, depthNear):
+	def getSingleSegment (self, side, extremity, depthNear):
 		funcRef = "RubiksCube .getSingleSegment"
-		#  Gets a single segment from a face, given the face and which side to get it from
-		depthFar = self .cubeCount - depthNear - 1
+		#  Gets a single segment from a side, given the side and which edge to
+		#  get it from
+
+		#  Work out which edge of the side we're looking at
+		if extremity == 0 or extremity == 1:
+			theDepth = depthNear
+		else:
+			theDepth = self .cubeCount - depthNear - 1
+
 		theSegment = []
-		if extremity == 0:
+		if extremity == 0 or extremity == 2:
 			for i in range (self .cubeCount):
-				theSegment .append (self .sideMatrix [face][i][depthNear])
-		elif extremity == 1:
+				theSegment .append (self .sideMatrix [side][i][theDepth])
+		elif extremity == 1 or extremity == 3:
 			for i in range (self .cubeCount):
-				theSegment .append (self .sideMatrix [face][depthNear][i])
-		elif extremity == 2:
-			for i in range (self .cubeCount):
-				theSegment .append (self .sideMatrix [face][i][depthFar])
-		elif extremity == 3:
-			for i in range (self .cubeCount):
-				theSegment .append (self .sideMatrix [face][depthFar][i])
+				theSegment .append (self .sideMatrix [side][theDepth][i])
 		return theSegment
 
-	def setSingleSegment (self, face, extremity, depthNear, theSegment):
+	def setSingleSegment (self, side, extremity, depthNear, theSegment):
 		funcRef = "RubiksCube .setSingleSegment"
-		#  Writes a single segment to a face, given the position of said segment
+		#  Writes a single segment to a side, given the position of
+		#  said segment
 
-		if extremity > 3:
-			die (funcRef, "`extremity` out of range.")
-		if face > 6:
-			die (funcRef, "`face` out of range.")
-		if depthNear >= self .cubeCount:
-			die (funcRef, "`depthNear` out of range.")
+		# #  Error checking
+		# if extremity > 3:
+		# 	die (funcRef, "`extremity` out of range.")
+		# if side > 6:
+		# 	die (funcRef, "`side` out of range.")
+		# if depthNear >= self .cubeCount:
+		# 	die (funcRef, "`depthNear` out of range.")
 
-		depthFar = self .cubeCount - depthNear - 1
-		if extremity == 0:
+		#  Work out which side of the side we're looking at
+		if extremity == 0 or extremity == 1:
+			theDepth = depthNear
+		else:
+			theDepth = self .cubeCount - depthNear - 1
+
+		if extremity == 0 or extremity == 2:
 			for i in range (self .cubeCount):
-				self .sideMatrix [face][i][depthNear] = theSegment [i]
-				self .visualMatrix [face][i][depthNear] .setFaceColour (theSegment [i])
-		elif extremity == 1:
+				self .sideMatrix [side][i][theDepth] = theSegment [i]
+				self .visualMatrix [side][i][theDepth] .setFaceColour (theSegment [i])
+		elif extremity == 1 or extremity == 3:
 			for i in range (self .cubeCount):
-				self .sideMatrix [face][depthNear][i] = theSegment [i]
-				self .visualMatrix [face][depthNear][i] .setFaceColour (theSegment [i])
-		elif extremity == 2:
-			for i in range (self .cubeCount):
-				self .sideMatrix [face][i][depthFar] = theSegment [i]
-				self .visualMatrix [face][i][depthFar] .setFaceColour (theSegment [i])
-		elif extremity == 3:
-			for i in range (self .cubeCount):
-				self .sideMatrix [face][depthFar][i] = theSegment [i]
-				self .visualMatrix [face][depthFar][i] .setFaceColour (theSegment [i])
+				self .sideMatrix [side][theDepth][i] = theSegment [i]
+				self .visualMatrix [side][theDepth][i] .setFaceColour (theSegment [i])
 		return
 
+	def extremityToCoords (self, extremity):
+		funcRef = "RubiksCube .extremityToCoords"
+		#  Converts an extremity reference to an x-y coordinate tuple.
+		#  0 -> x-close
+		#  1 -> y-close
+		#  2 -> x-far
+		#  3 -> y-far
+		if extremity == 0:
+			return (1, 0)
+		elif extremity == 1:
+			return (0, 1)
+		elif extremity == 2:
+			return (1, self .cubeCount - 1)
+		elif extremity == 3:
+			return (self .cubeCount - 1, 1)
+		else:
+			die (funcRef, "extremity out of range")
 
-
-	##  Algorithms
-
-	def recordMove (self, theFace, theDirection, theDepth):
+	def recordMove (self, theSide, theDirection, theDepth):
 		funcRef = "RubiksCube .recordMove"
 		#  Records a given move
 
 		if theDirection == 0:
-			log (funcRef, "F %d;  CW ;  D %d" % (theFace, theDepth))
+			log (funcRef, "F %d;  CW ;  D %d" % (theSide, theDepth))
 		elif theDirection == 1:
-			log (funcRef, "F %d;  CCW;  D %d" % (theFace, theDepth))
+			log (funcRef, "F %d;  CCW;  D %d" % (theSide, theDepth))
 		else:
 			die ("RubiksCube .recordMove", "`theDirection` out of bounds.")
 
-	def shuffle (self):
+
+	##  Algorithms
+	#  We'll need a different algo for 2x2
+
+	def shuffle (self, shuffleAmount = cubeShuffleAmount):
 		funcRef = "RubiksCube .shuffle"
 		#  Function to shuffle the cube, for as long as set in preferences.py
 		log (funcRef, "Shuffling the cube...")
@@ -419,14 +472,161 @@ class RubiksCube:
 		random .seed ()
 
 		maxDepth = self .cubeCount - 1
-		for i in range (cubeShuffleAmount):
+		for i in range (shuffleAmount):
 		#while True:
-			sleep (self .updatePeriod)
-
 			#  Random variables:  Face, Direction, Depth
-			self .rotateAFace (random .randrange (6), random .randrange (2), random .randrange (maxDepth))
+			self .rotateASide (random .randrange (6), random .randrange (2), random .randrange (maxDepth))
 
 		log (funcRef, "Shuffling complete!")
+		return
+
+	def algoCornerSwap (self):
+		funcRef = "RubiksCube .algoCornerSwap"
+		return
+
+	def algoFaceCentre (self):
+		funcRef = "RubiksCube .algoFaceCentre"
+		return
+	def algoFaceEdges (self):
+		funcRef = "RubiksCube .algoFaceEdges"
+		return
+
+	def algoFace1Cross (self, theSide = userStartingFace):
+		funcRef = "RubiksCube .algoFace1Cross"
+		#  Tries to solve the cross on the starting face
+		#  This assunes the cube has already been sorted into a 3x3
+		log (funcRef, "Starting algorithm.")
+
+		for extremity in range (4):
+			if self .algoCheckEdge (theSide, extremity) == False:
+				#  Need to find that edge
+				foundSide, foundEdge, neighbourSide, neighbourEdge, targetSide = self .algoFindEdge (theSide, extremity)
+				topSide = sideOpposites [theSide]
+				topEdge = sideNeighboursReverse [neighbourSide][topSide]
+
+				#  Turn so the face is on the opposite side
+				self .algoTurnDiff (neighbourSide, neighbourEdge, topEdge)
+
+				#  Rotate so the edge is over the correct face
+				#neighbourSide, targetSide, sideNeighboursReverse
+				!topTurnsStart = sideNeighboursReverse [theSide][neighbourSide]
+				!topTurnsDest = sideNeighboursReverse [theSide][targetSide]
+				undoTurns = self .algoTurnDiff (topSide, topTurnsStart, topTurnsDest)
+				return
+
+				# #  Undo previous turns
+				# if undoTurns == -1:
+				# 	self .rotateASide (neighbourSide, 0, 0)
+				# elif undoTurns == 1:
+				# 	self .rotateASide (neighbourSide, 1, 0)
+				# elif undoTurns == 2:
+				# 	self .rotateASide (neighbourSide, 1, 0)
+				# 	self .rotateASide (neighbourSide, 1, 0)
+
+				#  Flip back down
+				self .rotateASide (targetSide, 0, 0)
+				self .rotateASide (targetSide, 0, 0)
+				return
+
+		log (funcRef, "Algorithm complete.")
+		return
+
+	def algoTurnDiff (self, theSide, startEdge, destEdge):
+		#  Function to turn an edge on a given side to a specified destination
+		#  Calculate direction of turn
+		turnAmount = turnDiffs [startEdge][destEdge]
+		if turnAmount == -1:
+			#  Rotate CCW
+			self .rotateASide (theSide, 1, 0)
+			undoTurns = -1
+		elif turnAmount == 1:
+			#  Rotate CW
+			self .rotateASide (theSide, 0, 0)
+			undoTurns = 1
+		elif turnAmount == 2:
+			#  Rotate twice
+			self .rotateASide (theSide, 0, 0)
+			self .rotateASide (theSide, 0, 0)
+			undoTurns = 2
+		elif turnAmount != 0:
+			die (funcRef, "Bad amount to turn (`edgeDiff`)")
+		return turnAmount
+
+	def algoCheckEdge (self, theSide, extremity):
+		funcRef = "RubiksCube .algoCheckEdge"
+		#  Checks if a given edge is in the correct place
+
+		#  Get some useful co-ordinates
+		xCoord, yCoord = self .extremityToCoords (extremity)
+
+		if self .sideMatrix [theSide][xCoord][yCoord] != theSide:
+			debug (funcRef, "Edge [%d][%d][%d] out of place" % (theSide, xCoord, yCoord))
+			return False
+		else:
+			#  Get the neighbouring face
+			neighbourSide = sideNeighbours [theSide][extremity][0]
+			xCoordNeighbour, yCoordNeighbour = self .extremityToCoords (sideNeighbours [theSide][extremity][1])
+
+			if neighbourSide != self .sideMatrix [neighbourSide][xCoordNeighbour][yCoordNeighbour]:
+				debug (funcRef, "Edge [%d][%d][%d] out of place due to [%d][%d][%d]" % (theSide, xCoord, yCoord, neighbourSide, xCoordNeighbour, yCoordNeighbour))
+				return False
+			else:
+				debug (funcRef, "Edge [%d][%d][%d] correct" % (theSide, xCoord, yCoord))
+				return True
+
+	def algoFindEdge (self, targetSide, extremity):
+		funcRef = "RubiksCube .algoFindEdge"
+		#  Checks if a given edge is in the correct place
+
+		#  Calculate where we're trying to match against
+		targetNeighbour = sideNeighbours [targetSide][extremity][0]
+
+		#  Loop throuugh each edge and see if that's our boy
+		for currSide in range (6):
+			for currEdge in range (4):
+				#  Get current edge co-ordinates
+				xCoord, yCoord = self .extremityToCoords (currEdge)
+				if self .sideMatrix [currSide][xCoord][yCoord] == targetSide:
+					#  Get the complimenting face
+					#  We essentially lookup the bordering side, loopup
+					#  the relevant face, get co-ords for that edge, then read
+					#  its value so we can compare it to `targetNeighbour`
+					neighbourSide = sideNeighbours [currSide][currEdge]
+					xCoordNeighbour, yCoordNeighbour = self .extremityToCoords (neighbourSide [1])
+
+					if self .sideMatrix [neighbourSide [0]][xCoordNeighbour][yCoordNeighbour] == targetNeighbour:
+						#  Return the relevant side & extremity, printing
+						#  this and the complement face position too
+						debug (funcRef, "Found edge at [%d][%d][%d] + [%d][%d][%d]" % (currSide, xCoord, yCoord, neighbourSide [0], xCoordNeighbour, yCoordNeighbour))
+						return (currSide, currEdge, neighbourSide [0], neighbourSide [1], targetNeighbour)
+					else:
+						debug (funcRef, "Edge [%d][%d][%d]:  Complement edge [%d][%d][%d] incorrect" % (currSide, xCoord, yCoord, neighbourSide [0], xCoordNeighbour, yCoordNeighbour))
+
+				else:
+					debug (funcRef, "Edge [%d][%d][%d] not relevant" % (currSide, xCoord, yCoord))
+
+		#  Couldn't find it!
+		die (funcRef, "Couldn't find edge %d -> %d" % (targetSide, extremity))
+
+
+
+	##  Execution Function(s)
+
+	def solve (self):
+		#  Perform an initial shuffle
+		#self .shuffle (1)
+		self .rotateASide (3, 0, 0)
+
+		#  Show off a bit
+		sleep (0.5)
+
+		#  Get everything looking like a 3x3
+		self .algoFaceCentre ()
+		self .algoFaceEdges ()
+
+		#  Solve the first face
+		self .algoFace1Cross (3)
+
 		return
 
 

@@ -11,6 +11,10 @@ def die (callingFunction, theErrorText):
 	log (callingFunction, theErrorText)
 	exit ()
 
+def debug (callingFunction, theErrorText):
+	if userDebugInfo == 1:
+		print ("[%s]  %s:  %s" % (datetime .now (), callingFunction, theErrorText))
+
 def log (callingFunction, theErrorText):
 	print ("[%s]  %s:  %s" % (datetime .now (), callingFunction, theErrorText))
 
@@ -23,14 +27,15 @@ userScreenHeight = 800
 #userCameraDistance = -250
 userCameraDistance = -250
 userMovePeriod = 0.02
+userDebugInfo = 0
 
 #  Matrices Window
-showMatricesWindow = 0
+showMatricesWindow = 1
 matricesWindowScale = 6
 matricesWindowCorrection = 2
 
 #  Cube Parameters
-userCubeSize = 5
+userCubeSize = 3
 userCubeLength = 20
 userCubeFaceBorderMargin = 1
 userCubeSpacing = 1
