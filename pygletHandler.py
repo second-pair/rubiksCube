@@ -29,7 +29,6 @@ spinTheCube = True
 #  Seems to sort the depth problem
 @window.event
 def on_resize (width, height):
-	funcRef = "on_resize"
 	#  Override the default on_resize handler to create a 3D projection
 	glViewport (0, 0, width, height)
 	glMatrixMode (GL_PROJECTION)
@@ -40,7 +39,6 @@ def on_resize (width, height):
 
 #  Update our viewport's rotation
 def update (dt):
-	funcRef = "update"
 	#  Main render update loop
 	global rx, ry, rz
 	if spinTheCube:
@@ -54,7 +52,6 @@ def update (dt):
 #  Refresh and render the view
 @window .event
 def on_draw ():
-	funcRef = "on_draw"
 
 	#window .clear ()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
@@ -71,13 +68,11 @@ def on_draw ():
 #  Add toggle-to-pause
 @window .event
 def on_mouse_press (x, y, button, modifiers):
-	funcRef = "on_mouse_press"
 	if button == pyglet .window .mouse .LEFT:
 		global spinTheCube
 		spinTheCube = not spinTheCube
 @window .event
 def on_key_press (symbol, modifiers):
-	funcRef = "on_key_press"
 	if symbol == pyglet .window .key .SPACE:
 		global spinTheCube
 		spinTheCube = not spinTheCube
@@ -86,7 +81,6 @@ def on_key_press (symbol, modifiers):
 
 #  One-time GL setup
 def pygletSetup ():
-	funcRef = "pygletSetup"
 
 	glClearColor (userBackgroundColour[0] / 255, userBackgroundColour[1] / 255, userBackgroundColour[2] / 255, 0)
 	#glColor3f  (25.0 /255, 196.0 / 255, 241.0 / 255)

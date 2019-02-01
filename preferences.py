@@ -7,16 +7,19 @@
 #  Error function
 #  I've put this here, as it's currently the only thinkg imported by evverything.
 from datetime import datetime
+import inspect
+
 def die (callingFunction, theErrorText):
-	log (callingFunction, theErrorText)
+	log (inspect .stack ()[1][3], theErrorText)
 	exit ()
 
-def debug (callingFunction, theErrorText):
+def debug (theErrorText):
 	if userDebugInfo == 1:
-		print ("[%s]  %s:  %s" % (datetime .now (), callingFunction, theErrorText))
+		print ("[%s]  %s:  %s" % (datetime .now (), inspect .stack ()[1][3], theErrorText))
 
-def log (callingFunction, theErrorText):
-	print ("[%s]  %s:  %s" % (datetime .now (), callingFunction, theErrorText))
+def log (theErrorText):
+	print ("[%s]  %s:  %s" % (datetime .now (), inspect .stack ()[1][3], theErrorText))
+
 
 #  Programme Parameters
 #  I should smart-DPI this again

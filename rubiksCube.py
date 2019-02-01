@@ -25,7 +25,6 @@ import threading
 
 
 ##  Main Code
-funcRef = "main"
 
 #  Generate the cube
 theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
