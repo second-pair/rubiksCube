@@ -26,21 +26,23 @@ userScreenWidth = 1000
 userScreenHeight = 800
 #userCameraDistance = -250
 userCameraDistance = -250
-userMovePeriod = 0.02
-userDebugInfo = 0
+userDebugInfo = 1
 
 #  Matrices Window
 showMatricesWindow = 1
 matricesWindowScale = 6
 matricesWindowCorrection = 2
 
+#  Timey Wimey
+userCubeRotateRate = 2
+userAlgoMovePeriod = 0.02
+
 #  Cube Parameters
 userCubeSize = 3
 userCubeLength = 20
 userCubeFaceBorderMargin = 1
 userCubeSpacing = 1
-userStartingFace = 1
-userCubeRotateRate = 2
+userAlgoStartingSide = 0
 cubeShuffleAmount = 100
 
 #  Colours

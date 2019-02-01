@@ -20,6 +20,9 @@ from primitives import CubeFace
 from time import sleep
 import threading
 import random
+# import inspect
+# print(inspect.stack()[1].function)
+# print(inspect.stack()[1][3])
 
 #  Setup Tk, if required
 if showMatricesWindow == 1:
@@ -45,6 +48,19 @@ sideNeighbours = {
 4: ((0, 1), (1, 1), (5, 1), (3, 1)),
 5: ((3, 2), (4, 2), (1, 0), (2, 2)),
 }
+#  Need to make everything work with this later on
+sideNeighboursTemp = {
+0: {1: 2, 4: 0, 3: 0, 2: 0},
+1: {5: 2, 4: 1, 0: 0, 2: 3},
+2: {0: 3, 3: 3, 5: 3, 1: 3},
+3: {0: 2, 4: 3, 5: 0, 2: 1},
+4: {0: 1, 1: 1, 5: 1, 3: 1},
+5: {3: 2, 4: 2, 1: 0, 2: 2},
+}
+#  This one will give you the face that borders a given face
+#  First value is the face you're looking at
+#  Second value (dictionary) gives the relevant face that borders the
+#  keyed neighbour
 sideNeighboursReverse = {
 0: {1: 2, 4: 0, 3: 0, 2: 0},
 1: {5: 2, 4: 1, 0: 0, 2: 3},
@@ -88,7 +104,7 @@ class RubiksCube:
 		self .visualMatrix = []
 		self .matricesViewerData = []
 
-	def init (self, cubeCount = userCubeSize, cubeLength = userCubeLength, xPos = 0, yPos = 0, zPos = 0, updatePeriod = userMovePeriod):
+	def init (self, cubeCount = userCubeSize, cubeLength = userCubeLength, xPos = 0, yPos = 0, zPos = 0, updatePeriod = userAlgoMovePeriod):
 		funcRef = "RubiksCube .init"
 		#  Manual init function
 
@@ -106,6 +122,8 @@ class RubiksCube:
 		self .generateVisualCube ()
 		if showMatricesWindow == 1:
 			self .buildMatricesViewer ()
+
+		self .recordMoves = open  ("lastMoves.txt", "w")
 
 		log (funcRef, "Generated %d faces." % theRubiksCube .getFaceCount ())
 		return
@@ -452,12 +470,17 @@ class RubiksCube:
 		funcRef = "RubiksCube .recordMove"
 		#  Records a given move
 
+		self .recordMoves .write ("(%s,%s,%s),\n" % (theSide, theDirection, theDepth))
 		if theDirection == 0:
 			log (funcRef, "F %d;  CW ;  D %d" % (theSide, theDepth))
 		elif theDirection == 1:
 			log (funcRef, "F %d;  CCW;  D %d" % (theSide, theDepth))
 		else:
 			die ("RubiksCube .recordMove", "`theDirection` out of bounds.")
+
+	def replayMoves (self, theMoves):
+		for currMove in theMoves:
+			self .rotateASide (currMove [0], currMove [1], currMove [2])
 
 
 	##  Algorithms
@@ -471,7 +494,7 @@ class RubiksCube:
 		#  Set up the random generator
 		random .seed ()
 
-		maxDepth = self .cubeCount - 1
+		maxDepth = self .cubeCount // 2
 		for i in range (shuffleAmount):
 		#while True:
 			#  Random variables:  Face, Direction, Depth
@@ -491,65 +514,91 @@ class RubiksCube:
 		funcRef = "RubiksCube .algoFaceEdges"
 		return
 
-	def algoFace1Cross (self, theSide = userStartingFace):
+	def algoFace1Cross (self, theSide = userAlgoStartingSide):
 		funcRef = "RubiksCube .algoFace1Cross"
 		#  Tries to solve the cross on the starting face
 		#  This assunes the cube has already been sorted into a 3x3
 		log (funcRef, "Starting algorithm.")
 
+		oopResult = 0
+		topSide = sideOpposites [theSide]
+
 		for extremity in range (4):
 			if self .algoCheckEdge (theSide, extremity) == False:
-				#  Need to find that edge
-				foundSide, foundEdge, neighbourSide, neighbourEdge, targetSide = self .algoFindEdge (theSide, extremity)
-				topSide = sideOpposites [theSide]
-				topEdge = sideNeighboursReverse [neighbourSide][topSide]
+				oopResult += 1
 
-				#  Turn so the face is on the opposite side
-				self .algoTurnDiff (neighbourSide, neighbourEdge, topEdge)
+				#  Need to find that edge
+				foundSide, neighbourSide, neighbourEdge, targetSide = self .algoFindEdge (theSide, extremity)
+
+				#  Calculate other necessary variables
+				while neighbourSide == theSide or neighbourSide == topSide:
+					debug (funcRef, "Rotating edge to centre of found face")
+					self .rotateASide (foundSide, 0, 0)
+					foundSide, neighbourSide, neighbourEdge, targetSide = self .algoFindEdge (theSide, extremity)
+
+				topEdgeStart = sideNeighboursTemp [neighbourSide][topSide]
+				topEdgeDest = sideNeighboursTemp [targetSide][topSide]
+				neighbourEdgeTop = sideNeighboursTemp [topSide][neighbourSide]
+
+				#  Turn the edge so the face is on the top side
+				#  Need to check if the face is adjacent, but not at, the starting side
+
+				debug (funcRef, "Turning target edge to top side")
+				undoTurns = self .algoTurnDiff (neighbourSide, neighbourEdge, neighbourEdgeTop)
 
 				#  Rotate so the edge is over the correct face
-				#neighbourSide, targetSide, sideNeighboursReverse
-				!topTurnsStart = sideNeighboursReverse [theSide][neighbourSide]
-				!topTurnsDest = sideNeighboursReverse [theSide][targetSide]
-				undoTurns = self .algoTurnDiff (topSide, topTurnsStart, topTurnsDest)
-				return
+				debug (funcRef, "Turning target edge to above destination")
+				self .algoTurnDiff (topSide, topEdgeStart, topEdgeDest)
 
-				# #  Undo previous turns
-				# if undoTurns == -1:
-				# 	self .rotateASide (neighbourSide, 0, 0)
-				# elif undoTurns == 1:
-				# 	self .rotateASide (neighbourSide, 1, 0)
-				# elif undoTurns == 2:
-				# 	self .rotateASide (neighbourSide, 1, 0)
-				# 	self .rotateASide (neighbourSide, 1, 0)
+				#  Undo previous turns to keep pre-solved cross-edges
+				#  in place
+				debug (funcRef, "Undoing damage to existing cross")
+				if neighbourSide != targetSide:
+					if undoTurns == -1:
+						self .rotateASide (neighbourSide, 0, 0)
+					elif undoTurns == 1:
+						self .rotateASide (neighbourSide, 1, 0)
+					elif undoTurns == 2:
+						self .rotateASide (neighbourSide, 1, 0)
+						self .rotateASide (neighbourSide, 1, 0)
 
 				#  Flip back down
+				debug (funcRef, "Rotating target edge into destination")
 				self .rotateASide (targetSide, 0, 0)
 				self .rotateASide (targetSide, 0, 0)
-				return
-
 		log (funcRef, "Algorithm complete.")
+		return oopResult
+
+	def algoFace1Corners (self, theSide = userAlgoStartingSide):
+		funcRef = "RubiksCube .algoFace1Corners"
+		#  You next!
 		return
 
 	def algoTurnDiff (self, theSide, startEdge, destEdge):
+		funcRef = "RubiksCube .algoTurnDiff"
 		#  Function to turn an edge on a given side to a specified destination
 		#  Calculate direction of turn
 		turnAmount = turnDiffs [startEdge][destEdge]
 		if turnAmount == -1:
 			#  Rotate CCW
+			debug (funcRef, "Turning CCW *1")
 			self .rotateASide (theSide, 1, 0)
 			undoTurns = -1
 		elif turnAmount == 1:
 			#  Rotate CW
+			debug (funcRef, "Turning CW  *1")
 			self .rotateASide (theSide, 0, 0)
 			undoTurns = 1
 		elif turnAmount == 2:
 			#  Rotate twice
+			debug (funcRef, "Turning CW  *2")
 			self .rotateASide (theSide, 0, 0)
 			self .rotateASide (theSide, 0, 0)
 			undoTurns = 2
 		elif turnAmount != 0:
 			die (funcRef, "Bad amount to turn (`edgeDiff`)")
+		else:
+			debug (funcRef, "Not turning")
 		return turnAmount
 
 	def algoCheckEdge (self, theSide, extremity):
@@ -598,7 +647,7 @@ class RubiksCube:
 						#  Return the relevant side & extremity, printing
 						#  this and the complement face position too
 						debug (funcRef, "Found edge at [%d][%d][%d] + [%d][%d][%d]" % (currSide, xCoord, yCoord, neighbourSide [0], xCoordNeighbour, yCoordNeighbour))
-						return (currSide, currEdge, neighbourSide [0], neighbourSide [1], targetNeighbour)
+						return (currSide, neighbourSide [0], neighbourSide [1], targetNeighbour)
 					else:
 						debug (funcRef, "Edge [%d][%d][%d]:  Complement edge [%d][%d][%d] incorrect" % (currSide, xCoord, yCoord, neighbourSide [0], xCoordNeighbour, yCoordNeighbour))
 
@@ -608,14 +657,25 @@ class RubiksCube:
 		#  Couldn't find it!
 		die (funcRef, "Couldn't find edge %d -> %d" % (targetSide, extremity))
 
+	def algoCheckCorner (self, theSide, extremity1, extremity2):
+		funcRef = "RubiksCube .algoCheckCorner"
+		#
+		return
+
+	def algoFindCorner (self, targetSide, extremity1, extremity2):
+		funcRef = "RubiksCube .algoFindCorner"
+		#
+		return
+
 
 
 	##  Execution Function(s)
 
 	def solve (self):
 		#  Perform an initial shuffle
-		#self .shuffle (1)
-		self .rotateASide (3, 0, 0)
+		self .shuffle (100)
+		#self .replayMoves (lastMoves)
+		#self .rotateASide (3, 0, 0)
 
 		#  Show off a bit
 		sleep (0.5)
@@ -625,10 +685,116 @@ class RubiksCube:
 		self .algoFaceEdges ()
 
 		#  Solve the first face
-		self .algoFace1Cross (3)
+		while self .algoFace1Cross (3) > 0:
+			pass
+		self .algoFace1Corners (3)
 
 		return
 
 
 
 theRubiksCube = RubiksCube ()
+
+
+lastMoves = (
+(5,1,0),
+(4,1,0),
+(0,1,0),
+(3,1,0),
+(5,0,0),
+(2,1,0),
+(1,1,0),
+(2,0,0),
+(3,1,0),
+(4,0,0),
+(3,1,0),
+(5,0,0),
+(3,0,0),
+(1,0,0),
+(2,0,0),
+(5,0,0),
+(5,0,0),
+(5,1,0),
+(2,1,0),
+(5,0,0),
+(1,1,0),
+(1,0,0),
+(4,0,0),
+(2,1,0),
+(5,0,0),
+(5,1,0),
+(3,0,0),
+(0,1,0),
+(0,0,0),
+(2,1,0),
+(1,0,0),
+(5,1,0),
+(3,1,0),
+(3,1,0),
+(1,0,0),
+(4,1,0),
+(0,0,0),
+(4,1,0),
+(2,1,0),
+(4,1,0),
+(3,1,0),
+(0,0,0),
+(1,0,0),
+(3,1,0),
+(1,0,0),
+(2,1,0),
+(1,1,0),
+(4,0,0),
+(5,0,0),
+(0,0,0),
+(0,0,0),
+(3,1,0),
+(1,1,0),
+(0,1,0),
+(4,1,0),
+(3,0,0),
+(0,0,0),
+(5,1,0),
+(3,0,0),
+(5,0,0),
+(5,1,0),
+(3,1,0),
+(0,0,0),
+(3,1,0),
+(3,1,0),
+(3,0,0),
+(3,1,0),
+(3,0,0),
+(0,0,0),
+(3,0,0),
+(3,1,0),
+(3,0,0),
+(5,0,0),
+(4,0,0),
+(1,1,0),
+(0,0,0),
+(1,0,0),
+(4,0,0),
+(0,0,0),
+(4,1,0),
+(4,1,0),
+(5,0,0),
+(1,1,0),
+(3,0,0),
+(0,1,0),
+(3,1,0),
+(1,1,0),
+(3,0,0),
+(1,1,0),
+(3,0,0),
+(5,1,0),
+(3,0,0),
+(4,1,0),
+(5,1,0),
+(2,0,0),
+(5,1,0),
+(2,0,0),
+(1,0,0),
+(5,1,0),
+(0,0,0),
+)
