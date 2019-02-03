@@ -9,8 +9,9 @@
 from datetime import datetime
 import inspect
 
-def die (callingFunction, theErrorText):
-	log (inspect .stack ()[1][3], theErrorText)
+def die (theErrorText):
+	print ("[%s]  %s:  %s" % (datetime .now (), inspect .stack ()[1][3], theErrorText))
+	print ("^ Dieing due to ^")
 	exit ()
 
 def debug (theErrorText):
@@ -39,6 +40,7 @@ matricesWindowCorrection = 2
 #  Timey Wimey
 userCubeRotateRate = 2
 userAlgoMovePeriod = 0.02
+userShowoffDuration = 0.5
 
 #  Cube Parameters
 userCubeSize = 3

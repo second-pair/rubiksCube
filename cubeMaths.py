@@ -33,6 +33,7 @@ if showMatricesWindow == 1:
 	#  Setup DPI Scaling
 	root .tk .call ('tk', 'scaling', (userCubeSize + matricesWindowCorrection / userCubeSize) / (matricesWindowScale * root .winfo_screenheight () / 1080))
 
+#  Do we want to use one of these?  https://docs.python.org/3/library/collections.html#collections.OrderedDict
 #  This puppy, well...
 #  First value is the face you're looking at
 #  Second value (first sub-tuple pair) is a neighbouring face and the closest
@@ -47,15 +48,6 @@ sideNeighbours = {
 3: ((0, 2), (4, 3), (5, 0), (2, 1)),
 4: ((0, 1), (1, 1), (5, 1), (3, 1)),
 5: ((3, 2), (4, 2), (1, 0), (2, 2)),
-}
-#  Need to make everything work with this later on
-sideNeighboursTemp = {
-0: {1: 2, 4: 0, 3: 0, 2: 0},
-1: {5: 2, 4: 1, 0: 0, 2: 3},
-2: {0: 3, 3: 3, 5: 3, 1: 3},
-3: {0: 2, 4: 3, 5: 0, 2: 1},
-4: {0: 1, 1: 1, 5: 1, 3: 1},
-5: {3: 2, 4: 2, 1: 0, 2: 2},
 }
 #  This one will give you the face that borders a given face
 #  First value is the face you're looking at
@@ -432,8 +424,8 @@ class RubiksCube:
 				self .visualMatrix [side][theDepth][i] .setFaceColour (theSegment [i])
 		return
 
-	def extremityToCoords (self, extremity):
-		#  Converts an extremity reference to an x-y coordinate tuple.
+	def edgeExtremityToCoords (self, extremity):
+		#  Converts an extremity reference to x-y co-ordinates tuple.
 		#  0 -> x-close
 		#  1 -> y-close
 		#  2 -> x-far
@@ -448,6 +440,24 @@ class RubiksCube:
 			return (self .cubeCount - 1, 1)
 		else:
 			die ("extremity out of range")
+
+	def cornerExtremityToCoords (self, extremity1, extremity2):
+		#  Converts an extremity pair into x-y co-ordinates
+		if extremity1 == extremity2:
+			die ("Both extremities were the same!")
+		if extremity1 == 1 or extremity2 == 1:
+			xCoord = 0
+		elif extremity1 == 3 or extremity2 == 3:
+			xCoord = self .cubeCount - 1
+		else:
+			die ("x-extremity out of range")
+		if extremity1 == 0 or extremity2 == 0:
+			yCoord = 0
+		elif extremity1 == 2 or extremity2 == 2:
+			yCoord = self .cubeCount - 1
+		else:
+			die ("y-extremity out of range")
+		return (xCoord, yCoord)
 
 	def recordMove (self, theSide, theDirection, theDepth):
 		#  Records a given move
@@ -484,6 +494,32 @@ class RubiksCube:
 		log ("Shuffling complete!")
 		return
 
+	def algoTurnDiff (self, theSide, startEdge, destEdge):
+		#  Function to turn an edge on a given side to a specified destination
+		#  Calculate direction of turn
+		turnAmount = turnDiffs [startEdge][destEdge]
+		if turnAmount == -1:
+			#  Rotate CCW
+			debug ("Turning CCW *1")
+			self .rotateASide (theSide, 1, 0)
+			undoTurns = -1
+		elif turnAmount == 1:
+			#  Rotate CW
+			debug ("Turning CW  *1")
+			self .rotateASide (theSide, 0, 0)
+			undoTurns = 1
+		elif turnAmount == 2:
+			#  Rotate twice
+			debug ("Turning CW  *2")
+			self .rotateASide (theSide, 0, 0)
+			self .rotateASide (theSide, 0, 0)
+			undoTurns = 2
+		elif turnAmount != 0:
+			die ("Bad amount to turn (`edgeDiff`)")
+		else:
+			debug ("Not turning")
+		return turnAmount
+
 	def algoCornerSwap (self):
 		return
 
@@ -513,9 +549,9 @@ class RubiksCube:
 					self .rotateASide (foundSide, 0, 0)
 					foundSide, neighbourSide, neighbourEdge, targetSide = self .algoFindEdge (theSide, extremity)
 
-				topEdgeStart = sideNeighboursTemp [neighbourSide][topSide]
-				topEdgeDest = sideNeighboursTemp [targetSide][topSide]
-				neighbourEdgeTop = sideNeighboursTemp [topSide][neighbourSide]
+				topEdgeStart = sideNeighboursReverse [neighbourSide][topSide]
+				topEdgeDest = sideNeighboursReverse [targetSide][topSide]
+				neighbourEdgeTop = sideNeighboursReverse [topSide][neighbourSide]
 
 				#  Turn the edge so the face is on the top side
 				#  Need to check if the face is adjacent, but not at, the starting side
@@ -547,48 +583,45 @@ class RubiksCube:
 		return oopResult
 
 	def algoFace1Corners (self, theSide = userAlgoStartingSide):
-		#  You next!
-		return
+		#  Tries to solve the cornerson the starting face
+		#  This should ideally be run after `algoFace1Cross`
+		log ("Starting algorithm.")
 
-	def algoTurnDiff (self, theSide, startEdge, destEdge):
-		#  Function to turn an edge on a given side to a specified destination
-		#  Calculate direction of turn
-		turnAmount = turnDiffs [startEdge][destEdge]
-		if turnAmount == -1:
-			#  Rotate CCW
-			debug ("Turning CCW *1")
-			self .rotateASide (theSide, 1, 0)
-			undoTurns = -1
-		elif turnAmount == 1:
-			#  Rotate CW
-			debug ("Turning CW  *1")
-			self .rotateASide (theSide, 0, 0)
-			undoTurns = 1
-		elif turnAmount == 2:
-			#  Rotate twice
-			debug ("Turning CW  *2")
-			self .rotateASide (theSide, 0, 0)
-			self .rotateASide (theSide, 0, 0)
-			undoTurns = 2
-		elif turnAmount != 0:
-			die ("Bad amount to turn (`edgeDiff`)")
-		else:
-			debug ("Not turning")
-		return turnAmount
+		oopResult = 0
+		topSide = sideOpposites [theSide]
+		cornerExtremities = ((0, 1), (1, 2), (2, 3), (3, 0))
+
+		for extremity1, extremity2 in cornerExtremities:
+			if self .algoCheckCorner (theSide, extremity1, extremity2) == False:
+				oopResult += 1
+				#foundSide, neighbourSide, neighbourEdge, targetSide = self .algoFindEdge (theSide, extremity)
+				#foundSide, neighbour1Side, neighbour2Side =
+				self .algoFindCorner (theSide, extremity1, extremity2)
+
+		log ("Algorithm complete.")
+		return oopResult
+
+	def algoSidesMidEdges(self):
+		pass
+	def algoTopEdges (self):
+		pass
+	def algoTopCorners (self):
+		pass
 
 	def algoCheckEdge (self, theSide, extremity):
 		#  Checks if a given edge is in the correct place
 
 		#  Get some useful co-ordinates
-		xCoord, yCoord = self .extremityToCoords (extremity)
+		xCoord, yCoord = self .edgeExtremityToCoords (extremity)
 
+		#  Start checking the corner against the surrounding sides
 		if self .sideMatrix [theSide][xCoord][yCoord] != theSide:
 			debug ("Edge [%d][%d][%d] out of place" % (theSide, xCoord, yCoord))
 			return False
 		else:
 			#  Get the neighbouring face
 			neighbourSide = sideNeighbours [theSide][extremity][0]
-			xCoordNeighbour, yCoordNeighbour = self .extremityToCoords (sideNeighbours [theSide][extremity][1])
+			xCoordNeighbour, yCoordNeighbour = self .edgeExtremityToCoords (sideNeighbours [theSide][extremity][1])
 
 			if neighbourSide != self .sideMatrix [neighbourSide][xCoordNeighbour][yCoordNeighbour]:
 				debug ("Edge [%d][%d][%d] out of place due to [%d][%d][%d]" % (theSide, xCoord, yCoord, neighbourSide, xCoordNeighbour, yCoordNeighbour))
@@ -607,14 +640,14 @@ class RubiksCube:
 		for currSide in range (6):
 			for currEdge in range (4):
 				#  Get current edge co-ordinates
-				xCoord, yCoord = self .extremityToCoords (currEdge)
+				xCoord, yCoord = self .edgeExtremityToCoords (currEdge)
 				if self .sideMatrix [currSide][xCoord][yCoord] == targetSide:
 					#  Get the complimenting face
 					#  We essentially lookup the bordering side, loopup
 					#  the relevant face, get co-ords for that edge, then read
 					#  its value so we can compare it to `targetNeighbour`
 					neighbourSide = sideNeighbours [currSide][currEdge]
-					xCoordNeighbour, yCoordNeighbour = self .extremityToCoords (neighbourSide [1])
+					xCoordNeighbour, yCoordNeighbour = self .edgeExtremityToCoords (neighbourSide [1])
 
 					if self .sideMatrix [neighbourSide [0]][xCoordNeighbour][yCoordNeighbour] == targetNeighbour:
 						#  Return the relevant side & extremity, printing
@@ -631,8 +664,31 @@ class RubiksCube:
 		die ("Couldn't find edge %d -> %d" % (targetSide, extremity))
 
 	def algoCheckCorner (self, theSide, extremity1, extremity2):
-		#
-		return
+		#  Checks if a given corner is in the correct place
+
+		#  Get some useful co-ordinates
+		xCoord, yCoord = self .cornerExtremityToCoords (extremity1, extremity2)
+
+		#  Start checking the corner against the surrounding sides
+		if self .sideMatrix [theSide][xCoord][yCoord] != theSide:
+			debug ("Corner [%d][%d][%d] out of place" % (theSide, xCoord, yCoord))
+			return False
+		else:
+			#  Get the neighbouring face
+			neighbourSide1 = sideNeighbours [theSide][extremity1][0]
+			neighbourSide2 = sideNeighbours [theSide][extremity2][0]
+			xCoordNeighbour1, yCoordNeighbour1 = self .cornerExtremityToCoords (sideNeighboursReverse [theSide][neighbourSide1], sideNeighboursReverse [neighbourSide2][neighbourSide1])
+			xCoordNeighbour2, yCoordNeighbour2 = self .cornerExtremityToCoords (sideNeighboursReverse [theSide][neighbourSide2], sideNeighboursReverse [neighbourSide1][neighbourSide2])
+
+			if neighbourSide1 != self .sideMatrix [neighbourSide1][xCoordNeighbour1][yCoordNeighbour1]:
+				debug ("Corner [%d][%d][%d] out of place due to [%d][%d][%d]" % (theSide, xCoord, yCoord, neighbourSide1, xCoordNeighbour1, yCoordNeighbour1))
+				return False
+			elif neighbourSide2 != self .sideMatrix [neighbourSide2][xCoordNeighbour2][yCoordNeighbour2]:
+				debug ("Corner [%d][%d][%d] out of place due to [%d][%d][%d]" % (theSide, xCoord, yCoord, neighbourSide2, xCoordNeighbour2, yCoordNeighbour2))
+				return False
+			else:
+				debug ("Edge [%d][%d][%d] correct" % (theSide, xCoord, yCoord))
+				return True
 
 	def algoFindCorner (self, targetSide, extremity1, extremity2):
 		#
@@ -644,12 +700,12 @@ class RubiksCube:
 
 	def solve (self):
 		#  Perform an initial shuffle
-		self .shuffle (100)
+		#self .shuffle (100)
 		#self .replayMoves (lastMoves)
-		#self .rotateASide (3, 0, 0)
+		self .rotateASide (3, 0, 0)
 
 		#  Show off a bit
-		sleep (0.5)
+		sleep (userShowoffDuration)
 
 		#  Get everything looking like a 3x3
 		self .algoFaceCentre ()
@@ -658,7 +714,14 @@ class RubiksCube:
 		#  Solve the first face
 		while self .algoFace1Cross (3) > 0:
 			pass
+		sleep (userShowoffDuration)
 		self .algoFace1Corners (3)
+		sleep (userShowoffDuration)
+		self .algoSidesMidEdges()
+		sleep (userShowoffDuration)
+		self .algoTopEdges ()
+		sleep (userShowoffDuration)
+		self .algoTopCorners ()
 
 		return
 
@@ -668,104 +731,4 @@ theRubiksCube = RubiksCube ()
 
 
 lastMoves = (
-(5,1,0),
-(4,1,0),
-(0,1,0),
-(3,1,0),
-(5,0,0),
-(2,1,0),
-(1,1,0),
-(2,0,0),
-(3,1,0),
-(4,0,0),
-(3,1,0),
-(5,0,0),
-(3,0,0),
-(1,0,0),
-(2,0,0),
-(5,0,0),
-(5,0,0),
-(5,1,0),
-(2,1,0),
-(5,0,0),
-(1,1,0),
-(1,0,0),
-(4,0,0),
-(2,1,0),
-(5,0,0),
-(5,1,0),
-(3,0,0),
-(0,1,0),
-(0,0,0),
-(2,1,0),
-(1,0,0),
-(5,1,0),
-(3,1,0),
-(3,1,0),
-(1,0,0),
-(4,1,0),
-(0,0,0),
-(4,1,0),
-(2,1,0),
-(4,1,0),
-(3,1,0),
-(0,0,0),
-(1,0,0),
-(3,1,0),
-(1,0,0),
-(2,1,0),
-(1,1,0),
-(4,0,0),
-(5,0,0),
-(0,0,0),
-(0,0,0),
-(3,1,0),
-(1,1,0),
-(0,1,0),
-(4,1,0),
-(3,0,0),
-(0,0,0),
-(5,1,0),
-(3,0,0),
-(5,0,0),
-(5,1,0),
-(3,1,0),
-(0,0,0),
-(3,1,0),
-(3,1,0),
-(3,0,0),
-(3,1,0),
-(3,0,0),
-(0,0,0),
-(3,0,0),
-(3,1,0),
-(3,0,0),
-(5,0,0),
-(4,0,0),
-(1,1,0),
-(0,0,0),
-(1,0,0),
-(4,0,0),
-(0,0,0),
-(4,1,0),
-(4,1,0),
-(5,0,0),
-(1,1,0),
-(3,0,0),
-(0,1,0),
-(3,1,0),
-(1,1,0),
-(3,0,0),
-(1,1,0),
-(3,0,0),
-(5,1,0),
-(3,0,0),
-(4,1,0),
-(5,1,0),
-(2,0,0),
-(5,1,0),
-(2,0,0),
-(1,0,0),
-(5,1,0),
-(0,0,0),
 )
