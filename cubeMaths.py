@@ -75,6 +75,8 @@ turnDiffs = {
 2: (2, -1, 0, 1),
 3: (1, 2, -1, 0),
 }
+#  LUT for corner-extremity pairs
+cornerExtremities = ((0, 1), (1, 2), (2, 3), (3, 0))
 #  0 -> bottom
 #  1 -> back
 #  2 -> right
@@ -399,6 +401,7 @@ class RubiksCube:
 	def setSingleSegment (self, side, extremity, depthNear, theSegment):
 		#  Writes a single segment to a side, given the position of
 		#  said segment
+		#*
 
 		# #  Error checking
 		# if extremity > 3:
@@ -497,6 +500,7 @@ class RubiksCube:
 	def algoTurnDiff (self, theSide, startEdge, destEdge):
 		#  Function to turn an edge on a given side to a specified destination
 		#  Calculate direction of turn
+		#*
 		turnAmount = turnDiffs [startEdge][destEdge]
 		if turnAmount == -1:
 			#  Rotate CCW
@@ -548,6 +552,7 @@ class RubiksCube:
 					debug ("Rotating edge to centre of found face")
 					self .rotateASide (foundSide, 0, 0)
 					foundSide, neighbourSide, neighbourEdge, targetSide = self .algoFindEdge (theSide, extremity)
+				input ("...")
 
 				topEdgeStart = sideNeighboursReverse [neighbourSide][topSide]
 				topEdgeDest = sideNeighboursReverse [targetSide][topSide]
@@ -558,10 +563,12 @@ class RubiksCube:
 
 				debug ("Turning target edge to top side")
 				undoTurns = self .algoTurnDiff (neighbourSide, neighbourEdge, neighbourEdgeTop)
+				input ("...")
 
 				#  Rotate so the edge is over the correct face
 				debug ("Turning target edge to above destination")
 				self .algoTurnDiff (topSide, topEdgeStart, topEdgeDest)
+				input ("...")
 
 				#  Undo previous turns to keep pre-solved cross-edges
 				#  in place
@@ -574,11 +581,14 @@ class RubiksCube:
 					elif undoTurns == 2:
 						self .rotateASide (neighbourSide, 1, 0)
 						self .rotateASide (neighbourSide, 1, 0)
+				input ("...")
 
 				#  Flip back down
 				debug ("Rotating target edge into destination")
 				self .rotateASide (targetSide, 0, 0)
 				self .rotateASide (targetSide, 0, 0)
+				input ("...")
+
 		log ("Algorithm complete.")
 		return oopResult
 
@@ -589,7 +599,6 @@ class RubiksCube:
 
 		oopResult = 0
 		topSide = sideOpposites [theSide]
-		cornerExtremities = ((0, 1), (1, 2), (2, 3), (3, 0))
 
 		for extremity1, extremity2 in cornerExtremities:
 			if self .algoCheckCorner (theSide, extremity1, extremity2) == False:
@@ -631,7 +640,8 @@ class RubiksCube:
 				return True
 
 	def algoFindEdge (self, targetSide, extremity):
-		#  Checks if a given edge is in the correct place
+		#  Finds the location of a given edge
+		#  Additionally returns information on the edge's complement face
 
 		#  Calculate where we're trying to match against
 		targetNeighbour = sideNeighbours [targetSide][extremity][0]
@@ -643,7 +653,7 @@ class RubiksCube:
 				xCoord, yCoord = self .edgeExtremityToCoords (currEdge)
 				if self .sideMatrix [currSide][xCoord][yCoord] == targetSide:
 					#  Get the complimenting face
-					#  We essentially lookup the bordering side, loopup
+					#  We essentially lookup the bordering side, lookup
 					#  the relevant face, get co-ords for that edge, then read
 					#  its value so we can compare it to `targetNeighbour`
 					neighbourSide = sideNeighbours [currSide][currEdge]
@@ -691,8 +701,59 @@ class RubiksCube:
 				return True
 
 	def algoFindCorner (self, targetSide, extremity1, extremity2):
-		#
-		return
+		#  Finds the location of a given corner
+		#  Additionally returns information on the corner's complement faces
+
+		#  Calculate where we're trying to match against
+		targetNeighbour1 = sideNeighbours [targetSide][extremity1][0]
+		targetNeighbour2 = sideNeighbours [targetSide][extremity2][0]
+
+		#  Loop throuugh each edge and see if that's our boy
+		for currSide in range (6):
+			for currCornerExtremities in cornerExtremities:
+				#  Get current corner co-ordinates
+				xCoord, yCoord = self .cornerExtremityToCoords (currCornerExtremities [0], currCornerExtremities [1])
+				if self .sideMatrix [currSide][xCoord][yCoord] == targetSide:
+					#  Get the complimenting faces
+					#  We essentially lookup the bordering sides, lookup
+					#  the relevant faces, get co-ords for those faces, then
+					#  read its value so we can compare it to the
+					#  `targetNeighbour`s
+					neighbourSide1 = sideNeighbours [currSide][currCornerExtremities [0]]
+					neighbourSide2 = sideNeighbours [currSide][currCornerExtremities [1]]
+					xCoordNeighbour1, yCoordNeighbour1 = self .edgeExtremityToCoords (neighbourSide1 [1])
+					xCoordNeighbour2, yCoordNeighbour2 = self .edgeExtremityToCoords (neighbourSide2 [1])
+
+					neighbourFace1Value = self .sideMatrix [neighbourSide1 [0]][xCoordNeighbour1][yCoordNeighbour1] == targetNeighbour1
+					neighbourFace2Value = self .sideMatrix [neighbourSide2 [0]][xCoordNeighbour2][yCoordNeighbour2] == targetNeighbour2
+
+					#  Check if the found edges are some of the ones we're looking for
+					if neighbourFace1Value == targetNeighbour1:
+						if neighbourFace2Value == targetNeighbour2:
+							#  Return the relevant side & extremity, printing
+							#  this and the complement face position too
+							debug ("Found Corner at [%d][%d][%d] + [%d][%d][%d] + [%d][%d][%d]" % (currSide, xCoord, yCoord, neighbourSide1 [0], xCoordNeighbour1, yCoordNeighbour1, neighbourSide2 [0], xCoordNeighbour2, yCoordNeighbour2))
+							return (currSide, neighbourSide1 [0], neighbourSide1 [1], targetNeighbour1, neighbourSide2 [0], neighbourSide2 [1], targetNeighbour2)
+						else:
+							debug ("Corner [%d][%d][%d]:  Complement face [%d][%d][%d] incorrect" % (currSide, xCoord, yCoord, neighbourSide2 [0], xCoordNeighbour2, yCoordNeighbour2))
+
+					elif neighbourFace1Value == targetNeighbour2:
+						if neighbourFace2Value == targetNeighbour1:
+							#  Return the relevant side & extremity, printing
+							#  this and the complement face position too
+							debug ("Found Corner at [%d][%d][%d] + [%d][%d][%d] + [%d][%d][%d]" % (currSide, xCoord, yCoord, neighbourSide1 [0], xCoordNeighbour1, yCoordNeighbour1, neighbourSide2 [0], xCoordNeighbour2, yCoordNeighbour2))
+							return (currSide, neighbourSide1 [0], neighbourSide1 [1], targetNeighbour1, neighbourSide2 [0], neighbourSide2 [1], targetNeighbour2)
+						else:
+							debug ("Corner [%d][%d][%d]:  Complement face [%d][%d][%d] incorrect" % (currSide, xCoord, yCoord, neighbourSide2 [0], xCoordNeighbour2, yCoordNeighbour2))
+
+					else:
+						debug ("Corner [%d][%d][%d]:  Complement face [%d][%d][%d] incorrect" % (currSide, xCoord, yCoord, neighbourSide1 [0], xCoordNeighbour1, yCoordNeighbour1))
+
+				else:
+					debug ("Corner [%d][%d][%d] not relevant" % (currSide, xCoord, yCoord))
+
+		#  Couldn't find it!
+		die ("Couldn't find edge %d -> %d, %d" % (targetSide, extremity1, extremity2))
 
 
 
@@ -704,6 +765,18 @@ class RubiksCube:
 		#self .replayMoves (lastMoves)
 		self .rotateASide (3, 0, 0)
 
+		# for _ in range (4):
+		# 	for i in range (6):
+		# 		self .rotateASide (i, 0, 0)
+		# for _ in range (4):
+		# 	for i in range (5, -1, -1):
+		# 		self .rotateASide (i, 1, 0)
+
+		#self .rotateASide (2, 0, 0)
+		#self .rotateASide (3, 0, 0)
+		#self .rotateASide (4, 0, 0)
+		#self .rotateASide (5, 0, 0)
+
 		#  Show off a bit
 		sleep (userShowoffDuration)
 
@@ -714,6 +787,8 @@ class RubiksCube:
 		#  Solve the first face
 		while self .algoFace1Cross (3) > 0:
 			pass
+
+		return
 		sleep (userShowoffDuration)
 		self .algoFace1Corners (3)
 		sleep (userShowoffDuration)
