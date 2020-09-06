@@ -277,8 +277,10 @@ class RubiksCube:
 
 	def rotateASide (self, theSide, direction, segDepth):
 		#  Function to rotate a face CW or CCW
-		#  Need to ensure we don't rotate beyond half-way, since this'll
-		#  break the cube-solving logic (the faces are basically hard-coded).
+		#  Need to ensure we don't rotate with depth beyond half-way, since
+		#  this'll break the cube-solving logic (the faces are basically
+		#  hard-coded to always be in the same places).
+		#*
 		if segDepth >= self .cubeCount // 2:
 			die ("Trying to rotate beyond half-way point (`segDepth` = %d)" % segDepth)
 
@@ -347,6 +349,7 @@ class RubiksCube:
 		#  Function to rotate a single segment, either clockwise or
 		#  anti-clockwise.
 		#  This is the sort of thing a compiled language would be great for.
+		#*!  Definitely a problem
 
 		#  Firstly, store the first segment, so it can be overwritten
 		tempSegment = self .getSingleSegment (sideNeighbours [theSide][0][0], sideNeighbours [theSide][0][1], currDepth)
@@ -377,6 +380,9 @@ class RubiksCube:
 				self .getSingleSegment (sideNeighbours [theSide][3][0], sideNeighbours [theSide][3][1], currDepth))
 
 			self .setSingleSegment (sideNeighbours [theSide][3][0], sideNeighbours [theSide][3][1], currDepth, tempSegment)
+
+		else:
+			die ("`direction` wasn't 1 or 2")
 		return
 
 	def getSingleSegment (self, side, extremity, depthNear):
@@ -396,6 +402,7 @@ class RubiksCube:
 		elif extremity == 1 or extremity == 3:
 			for i in range (self .cubeCount):
 				theSegment .append (self .sideMatrix [side][theDepth][i])
+		print (theSegment)
 		return theSegment
 
 	def setSingleSegment (self, side, extremity, depthNear, theSegment):
@@ -500,7 +507,6 @@ class RubiksCube:
 	def algoTurnDiff (self, theSide, startEdge, destEdge):
 		#  Function to turn an edge on a given side to a specified destination
 		#  Calculate direction of turn
-		#*
 		turnAmount = turnDiffs [startEdge][destEdge]
 		if turnAmount == -1:
 			#  Rotate CCW
@@ -584,9 +590,10 @@ class RubiksCube:
 				input ("...")
 
 				#  Flip back down
+				#*
 				debug ("Rotating target edge into destination")
-				self .rotateASide (targetSide, 0, 0)
-				self .rotateASide (targetSide, 0, 0)
+				self .rotateASide (targetSide, 1, 0)
+				self .rotateASide (targetSide, 1, 0)
 				input ("...")
 
 		log ("Algorithm complete.")
@@ -761,7 +768,8 @@ class RubiksCube:
 
 	def solve (self):
 		#  Perform an initial shuffle
-		#self .shuffle (100)
+		self .shuffle (100)
+		return
 		#self .replayMoves (lastMoves)
 		self .rotateASide (3, 0, 0)
 

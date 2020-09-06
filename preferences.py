@@ -11,7 +11,7 @@ import inspect
 
 def die (theErrorText):
 	print ("[%s]  %s:  %s" % (datetime .now (), inspect .stack ()[1][3], theErrorText))
-	print ("^ Dieing due to ^")
+	print ("^ Dying due to ^")
 	exit ()
 
 def debug (theErrorText):
@@ -34,7 +34,7 @@ userDebugInfo = 1
 
 #  Matrices Window
 showMatricesWindow = 1
-matricesWindowScale = 6
+matricesWindowScale = 30
 matricesWindowCorrection = 2
 
 #  Timey Wimey
@@ -43,7 +43,7 @@ userAlgoMovePeriod = 0.02
 userShowoffDuration = 0.5
 
 #  Cube Parameters
-userCubeSize = 3
+userCubeSize = 30
 userCubeLength = 20
 userCubeFaceBorderMargin = 1
 userCubeSpacing = 1
@@ -52,14 +52,23 @@ cubeShuffleAmount = 100
 
 #  Colours
 userBackgroundColour = (40, 43, 53)
-userFaceColours = (	#  Easy dev colours
+userFaceColours = (	#  The cube I'm holding
+	(0, 255, 0),	#  0 - Green
+	(0, 0, 255),	#  1 - Blue
+	(255, 0, 0),	#  2 - Red
+	(255, 255, 255),#  3 - White
+	(221, 105, 46),	#  4 - Orange
+	(255, 212, 0),	#  5 - Yellow
+
+)
+'''(	#  Easy dev colours
 	(0, 0, 0),		#  0 - Black
 	(255, 0, 0),	#  1 - Red
 	(0, 255, 0),	#  2 - Green
 	(0, 0, 255),	#  3 - Blue
 	(127,127, 127),	#  4 - Grey
 	(255, 255, 255),#  5 - White
-)
+)'''
 '''(
     (251, 9, 44),
     (70, 225, 69),

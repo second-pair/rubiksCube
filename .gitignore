@@ -1,4 +1,9 @@
+.*.swp
+
+#  pyinstaller Files
+build
+bin
 __pycache__
-*.swp
-gitMsg
+
+
 lastMoves.txt
