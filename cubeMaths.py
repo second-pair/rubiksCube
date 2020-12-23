@@ -30,6 +30,8 @@ if showMatricesWindow == 1:
 	#  Setup the root window
 	root = tk .Tk ()
 	root .title ("Matrices Window")
+	#  Setup Font
+	#root .tk .Font
 	#  Setup DPI Scaling
 	root .tk .call ('tk', 'scaling', (userCubeSize + matricesWindowCorrection / userCubeSize) / (matricesWindowScale * root .winfo_screenheight () / 1080))
 
@@ -142,7 +144,8 @@ class RubiksCube:
 		self .bMVGFL (0, 3, " ")
 
 		#  Position the window
-		root .geometry ("+%d+%d" % (root .winfo_screenwidth () - root .winfo_width (), 0))
+		#root .geometry ("+%d+%d" % (root .winfo_screenwidth () - root .winfo_width (), 0))
+		root .geometry ("+%d+%d" % (userScreenHorizontal - 400, userScreenVertical))
 
 		return
 
@@ -150,6 +153,7 @@ class RubiksCube:
 		#  build Matrix Viewer Generate Face Label
 
 		newLabel = tk .Label (root, text = text)
+		newLabel .configure (font = ("default", matricesWindowFontSize))
 		newLabel .grid (row = row, column = column)
 		self .matricesViewerData .append (newLabel)
 		return

@@ -24,8 +24,8 @@ def log (theErrorText):
 
 #  Programme Parameters
 #  I should smart-DPI this again
-#userScreenWidth = 1800
-#userScreenHeight = 1000
+userScreenHorizontal = 1800
+userScreenVertical = 100
 userScreenWidth = 1000
 userScreenHeight = 800
 #userCameraDistance = -250
@@ -36,6 +36,7 @@ userDebugInfo = 1
 showMatricesWindow = 1
 matricesWindowScale = 30
 matricesWindowCorrection = 2
+matricesWindowFontSize = -20
 
 #  Timey Wimey
 userCubeRotateRate = 2
@@ -43,7 +44,7 @@ userAlgoMovePeriod = 0.02
 userShowoffDuration = 0.5
 
 #  Cube Parameters
-userCubeSize = 30
+userCubeSize = 3
 userCubeLength = 20
 userCubeFaceBorderMargin = 1
 userCubeSpacing = 1

@@ -21,7 +21,7 @@ if showMatricesWindow == 1:
 
 #  Initialise the window
 window = pyglet .window .Window (userScreenWidth, userScreenHeight, resizable = True)
-window .set_location (2000, 0)
+window .set_location (userScreenHorizontal, userScreenVertical)
 window .activate ()
 spinTheCube = True
 
