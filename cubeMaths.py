@@ -30,8 +30,6 @@ if showMatricesWindow == 1:
 	#  Setup the root window
 	root = tk .Tk ()
 	root .title ("Matrices Window")
-	#  Setup Font
-	#root .tk .Font
 	#  Setup DPI Scaling
 	root .tk .call ('tk', 'scaling', (userCubeSize + matricesWindowCorrection / userCubeSize) / (matricesWindowScale * root .winfo_screenheight () / 1080))
 
@@ -131,9 +129,9 @@ class RubiksCube:
 
 		#  Generate the face labels
 		self .bMVGFL (5, 3, self .getASide2D (0))
-		self .bMVGFL (7, 3, self .getASide2D (1))
+		self .bMVGFL (3, 3, self .getASide2D (1))
 		self .bMVGFL (3, 5, self .getASide2D (2))
-		self .bMVGFL (3, 3, self .getASide2D (3))
+		self .bMVGFL (7, 3, self .getASide2D (3))
 		self .bMVGFL (3, 1, self .getASide2D (4))
 		self .bMVGFL (1, 3, self .getASide2D (5))
 
@@ -772,10 +770,12 @@ class RubiksCube:
 
 	def solve (self):
 		#  Perform an initial shuffle
-		self .shuffle (100)
-		return
+		#self .shuffle (cubeShuffleAmount)
 		#self .replayMoves (lastMoves)
+		sleep (5)
 		self .rotateASide (3, 0, 0)
+
+		return
 
 		# for _ in range (4):
 		# 	for i in range (6):

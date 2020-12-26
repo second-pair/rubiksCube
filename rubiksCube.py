@@ -26,12 +26,12 @@ import threading
 
 ##  Main Code
 
-#  Generate the cube
+#  Generate the cube.
 theRubiksCube .init (userCubeSize, userCubeLength, 0, 0, 0)
 
-#  Shuffle the cube
-#shuffler = threading .Thread (target = theRubiksCube .solve)
-#shuffler .start()
+#  Shuffle the cube.
+shuffler = threading .Thread (target = theRubiksCube .solve)
+shuffler .start()
 
 #  Setup complete!
 pyglet .app .run ()

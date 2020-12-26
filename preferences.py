@@ -39,8 +39,8 @@ matricesWindowCorrection = 2
 matricesWindowFontSize = -20
 
 #  Timey Wimey
-userCubeRotateRate = 2
-userAlgoMovePeriod = 0.02
+userCubeRotateRate = 2#1
+userAlgoMovePeriod = 0#.02
 userShowoffDuration = 0.5
 
 #  Cube Parameters
